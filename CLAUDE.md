@@ -15,7 +15,17 @@
 *[To be documented as the project develops]*
 
 ## Development Guidelines
-*[To be documented as the project develops]*
+### Code Version Requirements
+- **Always use the latest version** of programming languages and frameworks
+- **Update development tools** to their latest stable versions
+- **Check compatibility** before updating to ensure all tools work together
+- **Document version requirements** in project configuration files
+
+### Technology Stack Versions
+- Use the latest stable versions of all chosen technologies
+- Document the minimum required versions
+- Test compatibility when updating any component
+- Keep development and production environments in sync
 
 ## Testing Strategy
 *[To be documented as the project develops]*
@@ -31,6 +41,19 @@
 
 ## Dependencies
 *[To be documented as the project develops]*
+
+### Dependency Management Guidelines
+- **Always use the latest stable versions** of all dependencies
+- **Check for updates regularly** before adding new features
+- **Security updates** must be applied immediately
+- **Version pinning** should be exact to ensure consistency
+- **Automated dependency updates** should be configured where possible
+
+### Version Selection Criteria
+1. **Latest Stable Release**: Always choose the latest stable version unless there's a specific compatibility issue
+2. **LTS Versions**: For critical dependencies, prefer Long Term Support versions
+3. **Security Patches**: Apply security patches immediately, even if it means updating to a newer version
+4. **Breaking Changes**: Document any breaking changes when updating major versions
 
 ## Versioning Strategy
 ### Semantic Versioning
@@ -115,3 +138,7 @@ Follow conventional commits:
 - Document all changes in the version history
 - Use conventional commit messages
 - Tag releases appropriately in git
+- **ALWAYS use the latest stable versions** of all languages, frameworks, and dependencies
+- **Check for the most recent version** before implementing any feature
+- **Update existing code** to use newer syntax and features when appropriate
+- **Document version choices** and any compatibility considerations
