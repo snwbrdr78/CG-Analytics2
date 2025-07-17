@@ -39,6 +39,7 @@ class FacebookCSVParser {
         columns: true,
         skip_empty_lines: true,
         trim: true,
+        bom: true, // Handle UTF-8 BOM
         cast: (value, context) => {
           // Auto-cast numbers
           if (context.header) return value;
