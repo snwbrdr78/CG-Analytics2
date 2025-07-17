@@ -82,10 +82,11 @@ async function startServer() {
     console.log('Database connection established successfully.');
     
     // Sync database models
-    if (process.env.NODE_ENV === 'development') {
-      await sequelize.sync({ alter: true });
-      console.log('Database models synchronized.');
-    }
+    // Temporarily disabled due to migration issues
+    // if (process.env.NODE_ENV === 'development') {
+    //   await sequelize.sync({ alter: true });
+    //   console.log('Database models synchronized.');
+    // }
     
     // Start server - listen on all network interfaces
     app.listen(PORT, '0.0.0.0', () => {
