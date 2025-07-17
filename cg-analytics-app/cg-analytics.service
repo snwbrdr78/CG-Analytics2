@@ -1,0 +1,26 @@
+[Unit]
+Description=CG Analytics Application
+After=network.target postgresql.service
+
+[Service]
+Type=forking
+User=ec2-user
+Group=ec2-user
+WorkingDirectory=/home/ec2-user/CG-Analytics/cg-analytics-app
+ExecStart=/usr/bin/pm2 start ecosystem.config.js
+ExecReload=/usr/bin/pm2 reload all
+ExecStop=/usr/bin/pm2 stop all
+Restart=on-failure
+RestartSec=10
+
+# Environment variables
+Environment="NODE_ENV=production"
+Environment="PATH=/usr/bin:/usr/local/bin:/home/ec2-user/.nvm/versions/node/v18.17.0/bin"
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=cg-analytics
+
+[Install]
+WantedBy=multi-user.target

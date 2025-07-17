@@ -1,4 +1,6 @@
-# CG-Analytics Project Documentation
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Repository Information
 - **Repository URL**: git@github.com:snwbrdr78/CG-Analytics2.git
@@ -6,13 +8,103 @@
 - **Initial Setup Date**: 2025-07-17
 
 ## Project Overview
-*[To be documented as the project develops]*
+CG-Analytics is a full-stack web application for tracking Facebook content monetization, managing artist royalties, and analyzing content performance for Comedy Genius. It processes Facebook Creator Studio CSV exports and provides comprehensive analytics and royalty reporting.
 
 ## Architecture
-*[To be documented as the project develops]*
+
+### Directory Structure
+```
+CG-Analytics/
+└── cg-analytics-app/
+    ├── backend/          # Express.js API server
+    ├── frontend/         # React/Vite SPA
+    ├── database/         # PostgreSQL database files
+    └── logs/            # Application logs
+```
+
+### Tech Stack
+- **Backend**: Node.js, Express.js 4.19.2, PostgreSQL, Sequelize ORM 6.37.3
+- **Frontend**: React 18.3.1, Vite 5.3.3, Tailwind CSS 3.4.6, React Query 3.39.3
+- **Authentication**: JWT tokens with bcryptjs
+- **Background Jobs**: Bull queue with Redis
+- **Process Management**: PM2
+
+### Database Schema
+Key models in `backend/models/`:
+- `Artist`: Artist info and royalty rates
+- `Post`: Content metadata (videos, reels, photos)
+- `Snapshot`: Point-in-time performance metrics
+- `Delta`: Calculated changes between snapshots
+- `ReelLink`: Associations between reels and source videos
+- `User`: Authentication and user management
+
+### API Routes
+- `/api/auth/*` - Authentication (login, register, verify)
+- `/api/upload/*` - CSV file processing
+- `/api/artists/*` - Artist CRUD operations
+- `/api/posts/*` - Content management and queries
+- `/api/analytics/*` - Performance analytics
+- `/api/reports/*` - Royalty report generation
 
 ## Key Components
-*[To be documented as the project develops]*
+
+### Backend Services
+- **CSV Processing**: `backend/services/csvProcessor.js` - Handles Facebook Creator Studio CSV imports
+- **Delta Calculation**: `backend/services/deltaCalculator.js` - Computes performance changes
+- **Report Generation**: `backend/services/reportGenerator.js` - Creates royalty reports
+- **Queue Processing**: `backend/queue/` - Background job handling
+
+### Frontend Components
+- **Authentication**: `frontend/src/contexts/AuthContext.jsx` - Auth state management
+- **API Client**: `frontend/src/utils/api.js` - Centralized API communication
+- **Main Views**: Dashboard, Upload, Artists, Posts, Analytics, Reports
+
+## Common Commands
+
+### Development
+```bash
+# Install all dependencies (frontend + backend)
+npm run install:all
+
+# Start development servers (frontend on :5173, backend on :5000)
+npm run dev
+
+# Start development in background with PM2
+npm run start:dev-bg
+
+# Individual development servers
+cd backend && npm run dev    # Backend only
+cd frontend && npm run dev   # Frontend only
+
+# Start backend only with PM2 (from backend directory)
+cd backend && pm2 start server.js --name "cg-analytics"
+```
+
+### Production
+```bash
+# Build frontend for production
+npm run build
+
+# Start production servers with PM2
+npm run start:bg
+
+# PM2 commands
+pm2 status              # Check running processes
+pm2 logs               # View logs
+pm2 logs cg-analytics  # View specific app logs
+pm2 restart all        # Restart all processes
+pm2 save               # Save current process list
+pm2 startup            # Configure auto-start on boot
+```
+
+### Database
+```bash
+# Run migrations
+cd backend && npx sequelize-cli db:migrate
+
+# Create new migration
+cd backend && npx sequelize-cli migration:generate --name migration-name
+```
 
 ## Development Guidelines
 ### Code Version Requirements
@@ -27,33 +119,69 @@
 - Test compatibility when updating any component
 - Keep development and production environments in sync
 
-## Testing Strategy
-*[To be documented as the project develops]*
-
-## Build and Deployment
-*[To be documented as the project develops]*
-
-## API Documentation
-*[To be documented as the project develops]*
-
 ## Environment Variables
-*[To be documented as the project develops]*
+Create `.env` file in `cg-analytics-app/backend/` (see `.env.example`):
+```
+# Database
+DB_NAME=cg_analytics
+DB_USER=your_db_user
+DB_PASSWORD=your_db_password
+DB_HOST=localhost
+DB_PORT=5432
 
-## Dependencies
-*[To be documented as the project develops]*
+# JWT
+JWT_SECRET=your_jwt_secret
 
-### Dependency Management Guidelines
-- **Always use the latest stable versions** of all dependencies
-- **Check for updates regularly** before adding new features
-- **Security updates** must be applied immediately
-- **Version pinning** should be exact to ensure consistency
-- **Automated dependency updates** should be configured where possible
+# Redis (for Bull queues)
+REDIS_HOST=localhost
+REDIS_PORT=6379
 
-### Version Selection Criteria
-1. **Latest Stable Release**: Always choose the latest stable version unless there's a specific compatibility issue
-2. **LTS Versions**: For critical dependencies, prefer Long Term Support versions
-3. **Security Patches**: Apply security patches immediately, even if it means updating to a newer version
-4. **Breaking Changes**: Document any breaking changes when updating major versions
+# Server
+PORT=5000
+NODE_ENV=development
+```
+
+## API Patterns
+
+### Authentication
+All API routes except `/api/auth/*` require JWT token in Authorization header:
+```javascript
+headers: {
+  'Authorization': `Bearer ${token}`
+}
+```
+
+### CSV Upload Processing
+1. Upload endpoint accepts multipart/form-data with CSV file
+2. Processing happens in background queue
+3. Returns job ID for status tracking
+4. CSV must be from Facebook Creator Studio export
+
+### Data Flow
+1. CSV Upload → Queue → Process → Store Snapshots
+2. Snapshots → Calculate Deltas → Store Performance Changes
+3. Artists + Posts + Deltas → Generate Reports → Export CSV
+
+## Deployment
+
+### PM2 Configuration
+Uses `ecosystem.config.js` for process management:
+- Backend runs on port 5000
+- Frontend served via Express static files
+- Logs stored in `./logs/`
+
+### Nginx Setup
+Reverse proxy configuration available in deployment scripts:
+- HTTP (80) redirects to HTTPS (443)
+- SSL with self-signed certificates
+- Proxies to localhost:5000
+
+### Systemd Service
+Alternative deployment via `cg-analytics.service`:
+```bash
+sudo systemctl start cg-analytics
+sudo systemctl enable cg-analytics
+```
 
 ## Versioning Strategy
 ### Semantic Versioning
@@ -77,7 +205,7 @@ This project follows [Semantic Versioning](https://semver.org/):
 - `hotfix/*`: Emergency fixes
 - `release/*`: Release preparation
 
-## Common Commands
+### Git Commands
 ```bash
 # Git operations
 git add .
@@ -95,13 +223,17 @@ git checkout -b release/v1.0.0
 ```
 
 ## Version History
+### v0.0.2 (2025-07-17)
+- Set up PostgreSQL 15 database
+- Configured database authentication
+- Created .env configuration
+- Successfully deployed backend with PM2
+- Updated documentation with complete setup instructions
+
 ### v0.0.1 (2025-07-17)
 - Initial repository setup
 - Created CLAUDE.md documentation
 - Established versioning strategy
-
-### Upcoming Versions
-*[To be documented as releases are planned]*
 
 ## Changelog Format
 Each version entry should include:
@@ -130,15 +262,17 @@ Follow conventional commits:
 *[To be documented as the project develops]*
 
 ## Notes for AI Assistants
-- This is a new project starting from scratch
-- All code should be well-documented and follow best practices
-- Regular commits should be made as features are developed
-- The project structure should be kept clean and organized
-- Follow semantic versioning for all releases
-- Document all changes in the version history
+- This is an existing Facebook content monetization tracking application
+- Backend API uses Express with Sequelize ORM for PostgreSQL
+- Frontend is a React SPA built with Vite and styled with Tailwind CSS
+- Authentication uses JWT tokens stored in localStorage
+- CSV processing happens asynchronously via Bull queues
+- Database: PostgreSQL 15 with user 'cg_user' and database 'cg_analytics'
+- Process management: PM2 for both development and production
+- Follow existing code patterns and conventions
 - Use conventional commit messages
-- Tag releases appropriately in git
-- **ALWAYS use the latest stable versions** of all languages, frameworks, and dependencies
-- **Check for the most recent version** before implementing any feature
-- **Update existing code** to use newer syntax and features when appropriate
-- **Document version choices** and any compatibility considerations
+- **ALWAYS use the latest stable versions** when adding new dependencies
+- **Check compatibility** with existing dependencies before updates
+- **Ensure .env file exists** in backend directory before running
+- **Run tests** before committing (when tests are implemented)
+- **Update CLAUDE.md** when adding new major features or changing architecture
