@@ -11,6 +11,8 @@ package-lock.json
 # Build outputs
 dist/
 build/
+frontend/dist/
+frontend/dist-ssr/
 *.tsbuildinfo
 
 # Logs
@@ -53,6 +55,7 @@ coverage/
 
 # Uploads (if storing locally)
 uploads/
+backend/uploads/
 temp/
 
 # SSL certificates (for local development)

@@ -2,108 +2,136 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Repository Information
-- **Repository URL**: git@github.com:snwbrdr78/CG-Analytics2.git
-- **Repository Type**: SSH-based GitHub repository
-- **Initial Setup Date**: 2025-07-17
-
 ## Project Overview
-CG-Analytics is a full-stack web application for tracking Facebook content monetization, managing artist royalties, and analyzing content performance for Comedy Genius. It processes Facebook Creator Studio CSV exports and provides comprehensive analytics and royalty reporting.
+CG-Analytics is a full-stack web application for tracking Facebook content monetization, managing artist royalties, and analyzing content performance. It processes Facebook Creator Studio CSV exports and provides comprehensive analytics, royalty reporting, and admin management capabilities.
+
+## Tech Stack
+- **Backend**: Node.js, Express.js 4.19.2, PostgreSQL with Sequelize ORM 6.37.3
+- **Frontend**: React 18.3.1, Vite 5.3.3, Tailwind CSS 3.4.6, React Query 3.39.3
+- **Authentication**: JWT tokens (7-day expiry) with bcryptjs, API key support
+- **Background Jobs**: Bull queue with Redis
+- **Process Management**: PM2
+- **File Processing**: Multer for uploads, csv-parse for parsing
 
 ## Architecture
 
-### Directory Structure
-```
-CG-Analytics2/
-└── cg-analytics-app/
-    ├── backend/          # Express.js API server
-    ├── frontend/         # React/Vite SPA
-    ├── database/         # PostgreSQL database files
-    └── logs/            # Application logs
-```
-
-### Tech Stack
-- **Backend**: Node.js, Express.js 4.19.2, PostgreSQL, Sequelize ORM 6.37.3
-- **Frontend**: React 18.3.1, Vite 5.3.3, Tailwind CSS 3.4.6, React Query 3.39.3
-- **Authentication**: JWT tokens with bcryptjs
-- **Background Jobs**: Bull queue with Redis
-- **Process Management**: PM2
-
-### Database Schema
-Key models in `backend/models/`:
-- `Artist`: Artist info and royalty rates
-- `Post`: Content metadata (videos, reels, photos)
-- `Snapshot`: Point-in-time performance metrics
-- `Delta`: Calculated changes between snapshots
+### Database Models
+- `Artist`: Artist information and royalty rates (0-100%)
+- `Post`: Content metadata (videos, reels, photos) with status tracking
+- `Snapshot`: Point-in-time performance metrics with unique constraint on [postId, snapshotDate]
+- `Delta`: Calculated changes between snapshots (daily/weekly/monthly/quarterly)
 - `ReelLink`: Associations between reels and source videos
-- `User`: Authentication and user management
+- `User`: Authentication with 5 role levels (super_admin > admin > editor > analyst > api_user)
+- `AuditLog`: Comprehensive tracking of all admin actions with IP/user agent
+- `ApiKey`: API key management with IP restrictions and usage tracking
+- `Site`: Platform integrations (Facebook/Instagram/YouTube) with encrypted tokens
+- `SiteSetting`: Configurable site settings
 
 ### API Routes
-- `/api/auth/*` - Authentication (login, register, verify)
-- `/api/upload/*` - CSV file processing
+Public routes:
+- `/api/auth/login`, `/api/auth/register` - Authentication
+- `/api/version` - Version info
+- `/health` - Health check
+
+Protected routes (require JWT or API key):
+- `/api/auth/*` - User profile management
+- `/api/upload/*` - CSV file processing (100MB limit)
 - `/api/artists/*` - Artist CRUD operations
-- `/api/posts/*` - Content management and queries
+- `/api/posts/*` - Content management with pagination
 - `/api/analytics/*` - Performance analytics
 - `/api/reports/*` - Royalty report generation
+- `/api/admin/*` - Admin panel (requires admin/super_admin role)
 
-## Key Components
+### Frontend Architecture
+- **State Management**: AuthContext for JWT/user state, ThemeContext for dark mode
+- **Data Fetching**: React Query with axios interceptors
+- **Routing**: React Router with ProtectedRoute component
+- **UI**: Tailwind CSS with dark mode support, Headless UI components
+- **Charts**: Recharts for data visualization
+- **Forms**: React Hook Form for validation
 
-### Backend Services
-- **CSV Processing**: `backend/utils/csvParser.js` - Handles Facebook Creator Studio CSV imports
-- **Snapshot Service**: `backend/services/snapshotService.js` - Manages performance snapshots
-- **Auth Middleware**: `backend/middleware/auth.js` - JWT authentication
-
-### Frontend Structure
-- **Pages**: `frontend/src/pages/` - Route components (Dashboard, Upload, Artists, etc.)
-- **Components**: `frontend/src/components/` - Reusable UI components
-- **Contexts**: `frontend/src/contexts/` - React contexts for state management
-- **Utils**: `frontend/src/utils/` - API client and utilities
-
-## Common Commands
+## Commands
 
 ### Development
 ```bash
-# Install all dependencies (frontend + backend)
+# Install all dependencies
 npm run install:all
 
-# Start development servers (frontend on :5173, backend on :5000)
+# Run both frontend and backend in development
 npm run dev
 
-# Start development in background with PM2
+# Run individual servers
+cd backend && npm run dev    # Backend on :5000
+cd frontend && npm run dev   # Frontend on :5173
+
+# Start with PM2 (background)
 npm run start:dev-bg
 
-# Individual development servers
-cd backend && npm run dev    # Backend only with nodemon
-cd frontend && npm run dev   # Frontend only with Vite
+# View logs
+npm run logs
 ```
 
 ### Production
 ```bash
-# Build frontend for production
+# Build frontend
 npm run build
 
-# Start production servers with PM2
+# Start production servers
 npm run start:bg
 
-# PM2 commands
-pm2 status              # Check running processes
-pm2 logs               # View logs
-pm2 restart all        # Restart all processes
-pm2 monit              # Real-time monitoring
+# PM2 management
+pm2 status
+pm2 logs
+pm2 restart all
+
+# Stop all processes
+npm run stop
 ```
 
-### Database
+### Database Management
 ```bash
 # Create admin user
 cd backend && npm run create-admin
 
-# For future migrations (when implemented)
-cd backend && npx sequelize-cli migration:generate --name migration-name
-cd backend && npx sequelize-cli db:migrate
+# Bump version
+npm run version:bump
 ```
 
-## Environment Variables
-Create `.env` file in `cg-analytics-app/backend/`:
+## Key Implementation Details
+
+### CSV Processing Flow
+The upload flow (`backend/utils/csvParser.js`):
+1. Accepts Facebook Creator Studio CSV exports
+2. Auto-detects and handles UTF-8 BOM
+3. Maps Facebook columns to database schema
+4. Creates/updates posts and snapshots atomically
+5. Calculates deltas between consecutive snapshots
+6. Returns detailed processing summary
+
+### Authentication & Authorization
+- Dual authentication: JWT tokens or API keys
+- Role hierarchy with permission inheritance
+- API keys support IP whitelisting and usage tracking
+- All admin actions logged to AuditLog with full context
+- Middleware: `authenticateToken`, `requireRole`, `requirePermission`
+
+### Role-Based Access Control
+Permissions by role:
+- **super_admin**: Full system access
+- **admin**: User/artist/post management, no system settings
+- **editor**: Create/edit posts and artists
+- **analyst**: Read-only access to data
+- **api_user**: API access only, no UI features
+
+### Dark Mode Implementation
+- CSS variables for theme colors in `:root` and `.dark`
+- System preference detection with manual override
+- Persisted to localStorage as 'theme'
+- Smooth transitions between themes
+- Tailwind `dark:` prefix for component styling
+
+## Environment Configuration
+Backend `.env` file:
 ```
 # Database
 DB_NAME=cg_analytics
@@ -112,8 +140,8 @@ DB_PASSWORD=your_db_password
 DB_HOST=localhost
 DB_PORT=5432
 
-# JWT
-JWT_SECRET=your_jwt_secret
+# Authentication
+JWT_SECRET=your_jwt_secret_key_here
 
 # Redis (for Bull queues)
 REDIS_HOST=localhost
@@ -122,135 +150,94 @@ REDIS_PORT=6379
 # Server
 PORT=5000
 NODE_ENV=development
+
+# Optional
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD=SecurePassword123!
+LOG_LEVEL=info
+CORS_ORIGIN=http://localhost:5173
 ```
 
-## API Patterns
+## Development Patterns
 
-### Authentication
-All API routes except `/api/auth/*` require JWT token in Authorization header:
-```javascript
-headers: {
-  'Authorization': `Bearer ${token}`
+### API Response Format
+Success:
+```json
+{
+  "success": true,
+  "data": {...}
 }
 ```
 
-### CSV Upload Processing
-1. Upload endpoint accepts multipart/form-data with CSV file
-2. CSV must be from Facebook Creator Studio export
-3. Processing happens synchronously (returns parsed data immediately)
+Error:
+```json
+{
+  "success": false,
+  "error": "Error message"
+}
+```
 
-### Data Flow
-1. CSV Upload → Parse → Store Snapshots
-2. Snapshots → Calculate Deltas → Store Performance Changes
-3. Artists + Posts + Deltas → Generate Reports → Export CSV
+### Frontend API Calls
+Use the configured axios instance:
+```javascript
+import api from '../utils/api';
+
+// Automatic token injection
+const response = await api.get('/artists');
+
+// With query params
+const posts = await api.get('/posts', { 
+  params: { page: 1, limit: 20 } 
+});
+```
+
+### Database Queries
+Sequelize with proper associations:
+```javascript
+// Include related data
+const posts = await Post.findAll({
+  include: [
+    { model: Artist },
+    { 
+      model: Snapshot, 
+      order: [['snapshotDate', 'DESC']],
+      limit: 1 
+    }
+  ],
+  where: { status: 'live' }
+});
+
+// Pagination pattern
+const { count, rows } = await Post.findAndCountAll({
+  limit: 20,
+  offset: (page - 1) * 20,
+  distinct: true
+});
+```
 
 ## Deployment
 
 ### PM2 Configuration
-Uses `ecosystem.config.js` for process management:
-- Backend runs on port 5000
-- Frontend build served via Express static files
-- Logs stored in `./logs/`
+Production (`ecosystem.config.js`):
+- Backend: Port 5000 with 1GB memory limit
+- Cluster mode with auto-restart
+- Time-stamped logs in `./logs/`
+- Environment variables hardcoded (use .env in dev)
 
-### Development Scripts
-- `start-dev-background.sh` - Starts development servers with PM2
-- `start-background.sh` - Builds frontend and starts production servers
-- `stop.sh` - Stops all PM2 processes
+### Nginx Configuration
+Production setup (`deployment/nginx.conf`):
+- HTTPS redirect from port 80
+- SSL certificates at `/etc/nginx/ssl/`
+- Frontend proxy to localhost:5173
+- API proxy to localhost:5000/api
+- WebSocket support at /ws
+- 100MB upload limit for CSVs
+- Extended timeouts (300s) for uploads
+- Security headers configured
 
-### Nginx Setup (Optional)
-For production deployment with SSL:
-- Use provided deployment scripts (deploy.sh, deploy-nginx-only.sh)
-- Configures reverse proxy to localhost:5000
-- Includes self-signed SSL certificate generation
-
-## Development Guidelines
-
-### Code Patterns
-- Backend uses async/await for all asynchronous operations
-- Frontend uses React Query for data fetching and caching
-- All dates stored as UTC in database
-- CSV parsing handles various Facebook export formats
-
-### Testing
-Tests not yet implemented. When adding tests:
-```bash
-cd backend && npm test    # Run backend tests
-cd frontend && npm test   # Run frontend tests
-```
-
-### Error Handling
-- Backend returns consistent error responses with status codes
-- Frontend displays errors using react-hot-toast notifications
-- All file uploads validated before processing
-
-## Key Features Implementation
-
-### CSV Processing Flow
-1. File uploaded to `/api/upload`
-2. Parsed using csv-parse library
-3. Creates/updates posts and snapshots
-4. Returns summary of processed data
-
-### Artist Assignment
-- Posts can be assigned to artists via owner mapping CSV
-- Royalty rates stored per artist
-- Reports calculate earnings based on artist assignments
-
-### Performance Tracking
-- Snapshots capture point-in-time metrics
-- Deltas calculate changes between snapshots
-- Analytics endpoints aggregate performance data
-
-## Common Issues & Solutions
-
-### Database Connection
-- Ensure PostgreSQL is running: `sudo systemctl status postgresql`
-- Check .env file has correct credentials
-- Verify database exists: `psql -U cg_user -d cg_analytics`
-
-### PM2 Process Management
-- If processes fail to start: `pm2 delete all && npm run start:dev-bg`
-- Check logs: `pm2 logs`
-- Ensure ports 5000 and 5173 are available
-
-### Frontend Build
-- Clear cache if build fails: `cd frontend && rm -rf node_modules/.vite`
-- Ensure all dependencies installed: `npm run install:all`
-
-## Recent Updates
-
-### Dark Mode Implementation
-- Full dark mode support across all pages and components
-- System preference detection with manual toggle
-- Persistent theme preference in localStorage
-- Consistent dark color scheme (gray-800/900 backgrounds)
-
-### UI Enhancements
-- Added Post Type column with styled badges (Video, Reel, Photo)
-- Added Custom Label column for asset tags
-- Improved table layouts and filtering
-
-### Admin Credentials
-- Username: info@comedygeni.us
-- Password: CGAdmin2025!
-
-## Version History
-### v0.0.3 (2025-01-18)
-- Added comprehensive dark mode support
-- Added Post Type and Custom Label columns to Posts page
-- Updated admin credentials to info@comedygeni.us
-- Cleaned up orphaned files and duplicate code
-- Created comprehensive README.md
-- Fixed all dark mode styling issues
-
-### v0.0.2 (2025-01-17)
-- Set up PostgreSQL 15 database
-- Configured database authentication
-- Created .env configuration
-- Successfully deployed backend with PM2
-- Updated documentation with complete setup instructions
-
-### v0.0.1 (2025-01-17)
-- Initial repository setup
-- Created CLAUDE.md documentation
-- Established versioning strategy
+### Production Deployment Steps
+1. Build frontend: `npm run build`
+2. Start with PM2: `npm run start:bg`
+3. Configure nginx with provided config
+4. Set up SSL certificates
+5. Create initial admin: `cd backend && npm run create-admin`

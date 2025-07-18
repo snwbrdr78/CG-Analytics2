@@ -1,0 +1,29 @@
+{
+  "name": "cg-analytics",
+  "version": "1.0.0",
+  "description": "Comedy Genius Analytics Platform for Facebook Content Monetization",
+  "scripts": {
+    "dev": "concurrently \"npm run backend:dev\" \"npm run frontend:dev\"",
+    "backend:dev": "cd backend && npm run dev",
+    "frontend:dev": "cd frontend && npm run dev",
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "build": "cd frontend && npm run build",
+    "start": "cd backend && npm start",
+    "start:bg": "./scripts/start-background.sh",
+    "start:dev-bg": "./scripts/start-dev-background.sh",
+    "stop": "./scripts/stop.sh",
+    "logs": "pm2 logs",
+    "status": "pm2 status",
+    "monitor": "pm2 monit",
+    "version:bump": "node scripts/bump-version.js build",
+    "version:minor": "node scripts/bump-version.js minor",
+    "version:major": "node scripts/bump-version.js major",
+    "postcommit": "npm run version:bump"
+  },
+  "keywords": ["analytics", "monetization", "facebook", "comedy"],
+  "author": "Comedy Genius",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
