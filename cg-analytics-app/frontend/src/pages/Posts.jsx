@@ -32,9 +32,20 @@ export default function Posts() {
   )
 
   const getIcon = (postType) => {
-    if (postType === 'Video' || postType === 'Videos') return FilmIcon
-    if (postType === 'Photo') return PhotoIcon
-    return FilmIcon
+    switch(postType) {
+      case 'Video':
+      case 'Videos':
+      case 'Reel':
+        return FilmIcon
+      case 'Photo':
+        return PhotoIcon
+      case 'Text':
+      case 'Status':
+      case 'Link':
+      case 'Links':
+      default:
+        return PencilIcon
+    }
   }
 
   const formatCPM = (earnings, views) => {
@@ -72,8 +83,13 @@ export default function Posts() {
           >
             <option value="">All Types</option>
             <option value="Video">Video</option>
+            <option value="Videos">Videos</option>
             <option value="Reel">Reel</option>
             <option value="Photo">Photo</option>
+            <option value="Text">Text</option>
+            <option value="Link">Link</option>
+            <option value="Links">Links</option>
+            <option value="Status">Status</option>
           </select>
         </div>
 
@@ -104,6 +120,12 @@ export default function Posts() {
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Post
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Type
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Custom Label
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Artist
@@ -138,22 +160,24 @@ export default function Posts() {
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
                             <Icon className="h-5 w-5 text-gray-400 mr-3" />
-                            <div>
-                              <div className="text-sm font-medium text-gray-900">
-                                {post.title || 'Untitled'}
-                              </div>
-                              <div className="text-sm text-gray-500">
-                                {post.assetTag && (
-                                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
-                                    {post.assetTag}
-                                  </span>
-                                )}
-                                <span className="ml-2 text-xs">
-                                  {post.postType}
-                                </span>
-                              </div>
+                            <div className="text-sm font-medium text-gray-900">
+                              {post.title || 'Untitled'}
                             </div>
                           </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            {post.postType}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {post.assetTag ? (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                              {post.assetTag}
+                            </span>
+                          ) : (
+                            <span className="text-gray-400">-</span>
+                          )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           {post.Artist?.name || 'Unassigned'}
