@@ -19,13 +19,19 @@ export const AuthProvider = ({ children }) => {
   // Check if user is logged in on mount
   useEffect(() => {
     const token = localStorage.getItem('token')
+    console.log('AuthContext mount - token exists:', !!token)
     if (token) {
+      // Make sure token is in headers before calling /auth/me
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`
       api.get('/auth/me')
         .then(res => {
+          console.log('Auth check successful:', res.data.user)
           setUser(res.data.user)
         })
-        .catch(() => {
+        .catch((err) => {
+          console.error('Auth check failed:', err)
           localStorage.removeItem('token')
+          delete api.defaults.headers.common['Authorization']
         })
         .finally(() => {
           setLoading(false)
@@ -36,17 +42,22 @@ export const AuthProvider = ({ children }) => {
   }, [])
 
   const login = async (email, password) => {
+    console.log('AuthContext login called with:', { email })
     try {
       const response = await api.post('/auth/login', { email, password })
+      console.log('Login API response:', response.data)
       const { user, token } = response.data
       
       localStorage.setItem('token', token)
+      console.log('Token stored in localStorage')
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`
       setUser(user)
+      console.log('User state updated:', user)
       setError(null)
       
       return { success: true }
     } catch (err) {
+      console.error('Login API error:', err)
       const errorMessage = err.response?.data?.error || 'Login failed'
       setError(errorMessage)
       return { success: false, error: errorMessage }

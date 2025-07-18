@@ -49,6 +49,14 @@ if (!fs.existsSync('uploads')) {
   fs.mkdirSync('uploads');
 }
 
+// Serve static files from frontend build
+app.use(express.static(path.join(__dirname, '../frontend/dist')));
+
+// Serve test file
+app.get('/test-login', (req, res) => {
+  res.sendFile(path.join(__dirname, '../test-login.html'));
+});
+
 // Routes
 app.use('/api/auth', authRoutes);
 
@@ -62,6 +70,29 @@ app.use('/api/reports', authenticateToken, reportsRoutes);
 // Health check
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date() });
+});
+
+// Debug endpoint - moved before static files
+app.get('/api/debug', (req, res) => {
+  console.log('Debug endpoint hit');
+  res.json({ 
+    status: 'ok',
+    headers: req.headers,
+    origin: req.get('origin'),
+    referer: req.get('referer'),
+    url: req.url,
+    method: req.method
+  });
+});
+
+// Serve frontend for all non-API routes (must be last)
+app.get('*', (req, res) => {
+  // Only serve index.html for non-API routes
+  if (!req.path.startsWith('/api/')) {
+    res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
+  } else {
+    res.status(404).json({ error: 'API endpoint not found' });
+  }
 });
 
 // Error handling

@@ -26,9 +26,14 @@ api.interceptors.response.use(
   response => response,
   error => {
     if (error.response?.status === 401) {
-      // Handle unauthorized
-      localStorage.removeItem('token')
-      window.location.href = '/login'
+      // Only redirect if we're not already on the login page
+      const currentPath = window.location.pathname
+      console.log('401 error detected, current path:', currentPath)
+      if (currentPath !== '/login' && currentPath !== '/register') {
+        console.log('Redirecting to login due to 401')
+        localStorage.removeItem('token')
+        window.location.href = '/login'
+      }
     }
     return Promise.reject(error)
   }

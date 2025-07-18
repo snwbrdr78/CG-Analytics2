@@ -17,15 +17,24 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    console.log('Login form submitted', formData)
     setLoading(true)
 
-    const result = await login(formData.email, formData.password)
-    
-    if (result.success) {
-      toast.success('Welcome back!')
-      navigate(from, { replace: true })
-    } else {
-      toast.error(result.error || 'Login failed')
+    try {
+      const result = await login(formData.email, formData.password)
+      console.log('Login result:', result)
+      
+      if (result.success) {
+        console.log('Login successful, navigating to:', from)
+        toast.success('Welcome back!')
+        navigate(from, { replace: true })
+      } else {
+        console.log('Login failed:', result.error)
+        toast.error(result.error || 'Login failed')
+      }
+    } catch (error) {
+      console.error('Login error:', error)
+      toast.error('An unexpected error occurred')
     }
     
     setLoading(false)
