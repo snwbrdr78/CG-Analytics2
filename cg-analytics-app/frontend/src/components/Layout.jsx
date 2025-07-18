@@ -1,5 +1,6 @@
 import { Link, useLocation, Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { useTheme } from '../contexts/ThemeContext'
 import {
   HomeIcon,
   CloudArrowUpIcon,
@@ -8,7 +9,9 @@ import {
   ChartBarIcon,
   DocumentTextIcon,
   ArchiveBoxXMarkIcon,
-  ArrowRightOnRectangleIcon
+  ArrowRightOnRectangleIcon,
+  SunIcon,
+  MoonIcon
 } from '@heroicons/react/24/outline'
 
 const navigation = [
@@ -25,6 +28,7 @@ export default function Layout() {
   const location = useLocation()
   const navigate = useNavigate()
   const { user, logout } = useAuth()
+  const { darkMode, toggleDarkMode } = useTheme()
 
   const handleLogout = async () => {
     await logout()
@@ -32,11 +36,22 @@ export default function Layout() {
   }
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
       {/* Sidebar */}
-      <div className="flex w-64 flex-col bg-gray-900">
-        <div className="flex h-16 items-center justify-center bg-gray-800">
+      <div className="flex w-64 flex-col bg-gray-900 dark:bg-gray-800">
+        <div className="flex h-16 items-center justify-between px-4 bg-gray-800 dark:bg-gray-900">
           <h1 className="text-xl font-bold text-white">CG Analytics</h1>
+          <button
+            onClick={toggleDarkMode}
+            className="p-2 text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-gray-700"
+            title={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+          >
+            {darkMode ? (
+              <SunIcon className="h-5 w-5" />
+            ) : (
+              <MoonIcon className="h-5 w-5" />
+            )}
+          </button>
         </div>
         <nav className="flex-1 space-y-1 px-2 py-4">
           {navigation.map((item) => {
@@ -48,8 +63,8 @@ export default function Layout() {
                 className={`
                   group flex items-center px-2 py-2 text-sm font-medium rounded-md
                   ${isActive
-                    ? 'bg-gray-800 text-white'
-                    : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                    ? 'bg-gray-800 dark:bg-gray-700 text-white'
+                    : 'text-gray-300 hover:bg-gray-700 dark:hover:bg-gray-600 hover:text-white'
                   }
                 `}
               >
@@ -66,10 +81,10 @@ export default function Layout() {
         </nav>
         
         {/* User info and logout */}
-        <div className="mt-auto p-4 border-t border-gray-800">
+        <div className="mt-auto p-4 border-t border-gray-800 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center">
+              <div className="w-8 h-8 bg-gray-600 dark:bg-gray-700 rounded-full flex items-center justify-center">
                 <span className="text-white text-sm font-medium">
                   {user?.username?.[0]?.toUpperCase() || 'U'}
                 </span>
@@ -78,7 +93,7 @@ export default function Layout() {
                 <p className="text-sm font-medium text-white">
                   {user?.username || 'User'}
                 </p>
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-gray-400 dark:text-gray-500">
                   {user?.role || 'user'}
                 </p>
               </div>
@@ -96,7 +111,7 @@ export default function Layout() {
 
       {/* Main content */}
       <div className="flex flex-1 flex-col overflow-hidden">
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto bg-white dark:bg-gray-900">
           <div className="p-8">
             <Outlet />
           </div>
