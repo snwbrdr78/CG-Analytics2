@@ -135,6 +135,50 @@ router.patch('/:postId/status', async (req, res) => {
   }
 });
 
+// Update post details
+router.put('/:postId', async (req, res) => {
+  try {
+    const { title, description, artistId } = req.body;
+    
+    const post = await Post.findByPk(req.params.postId);
+    
+    if (!post) {
+      return res.status(404).json({ error: 'Post not found' });
+    }
+
+    // Validate artist if provided
+    if (artistId) {
+      const artist = await Artist.findByPk(artistId);
+      if (!artist) {
+        return res.status(400).json({ error: 'Artist not found' });
+      }
+    }
+
+    // Update post with provided fields
+    await post.update({
+      title: title !== undefined ? title : post.title,
+      description: description !== undefined ? description : post.description,
+      artistId: artistId !== undefined ? artistId : post.artistId
+    });
+
+    // Fetch updated post with associations
+    const updatedPost = await Post.findByPk(req.params.postId, {
+      include: [
+        { model: Artist },
+        { 
+          model: Snapshot,
+          order: [['snapshotDate', 'DESC']],
+          limit: 1
+        }
+      ]
+    });
+    
+    res.json(updatedPost);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Update post artist assignment
 router.patch('/:postId/artist', async (req, res) => {
   try {

@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { useQuery } from 'react-query'
 import { format } from 'date-fns'
-import { MagnifyingGlassIcon, FilmIcon, PhotoIcon } from '@heroicons/react/24/outline'
+import { MagnifyingGlassIcon, FilmIcon, PhotoIcon, PencilIcon } from '@heroicons/react/24/outline'
 import api from '../utils/api'
+import EditPostModal from '../components/EditPostModal'
 
 export default function Posts() {
   const [filters, setFilters] = useState({
@@ -11,6 +12,8 @@ export default function Posts() {
     search: ''
   })
   const [page, setPage] = useState(0)
+  const [selectedPost, setSelectedPost] = useState(null)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const limit = 20
 
   const { data: posts, isLoading } = useQuery(
@@ -118,6 +121,9 @@ export default function Posts() {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Status
                     </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
@@ -174,6 +180,17 @@ export default function Posts() {
                             {post.status}
                           </span>
                         </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <button
+                            onClick={() => {
+                              setSelectedPost(post)
+                              setIsEditModalOpen(true)
+                            }}
+                            className="text-indigo-600 hover:text-indigo-900"
+                          >
+                            <PencilIcon className="h-5 w-5" />
+                          </button>
+                        </td>
                       </tr>
                     )
                   })}
@@ -207,6 +224,15 @@ export default function Posts() {
           </button>
         </div>
       </div>
+      
+      <EditPostModal 
+        post={selectedPost}
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setSelectedPost(null)
+          setIsEditModalOpen(false)
+        }}
+      />
     </div>
   )
 }
