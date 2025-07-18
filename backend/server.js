@@ -14,6 +14,7 @@ const analyticsRoutes = require('./routes/analytics');
 const reportsRoutes = require('./routes/reports');
 const adminRoutes = require('./routes/admin');
 const videoReelsRoutes = require('./routes/videoReels');
+const contentMatchingRoutes = require('./routes/contentMatching');
 const { authenticateToken } = require('./middleware/auth');
 
 const app = express();
@@ -80,6 +81,7 @@ app.use('/api/analytics', authenticateToken, analyticsRoutes);
 app.use('/api/reports', authenticateToken, reportsRoutes);
 app.use('/api/admin', authenticateToken, adminRoutes);
 app.use('/api/video-reels', authenticateToken, videoReelsRoutes);
+app.use('/api/content-matching', authenticateToken, contentMatchingRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

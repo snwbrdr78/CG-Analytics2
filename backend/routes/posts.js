@@ -11,6 +11,7 @@ router.get('/', async (req, res) => {
       type, 
       artistId, 
       assetTag,
+      createdAfter,
       limit = 50,
       offset = 0 
     } = req.query;
@@ -31,6 +32,12 @@ router.get('/', async (req, res) => {
     
     if (assetTag) {
       where.assetTag = assetTag;
+    }
+    
+    if (createdAfter) {
+      where.createdAt = {
+        [Op.gte]: new Date(createdAfter)
+      };
     }
 
     const posts = await Post.findAndCountAll({

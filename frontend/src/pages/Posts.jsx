@@ -2,18 +2,20 @@ import { useState } from 'react'
 import { useQuery } from 'react-query'
 import { format } from 'date-fns'
 import { MagnifyingGlassIcon, FilmIcon, PhotoIcon, PencilIcon, ChevronUpIcon, ChevronDownIcon, ArrowTopRightOnSquareIcon, LinkIcon, MinusCircleIcon } from '@heroicons/react/24/outline'
+import { toast } from 'react-hot-toast'
 import api from '../utils/api'
 import EditPostModal from '../components/EditPostModal'
 import LinkToVideoModal from '../components/LinkToVideoModal'
 import ViewLinkedReelsModal from '../components/ViewLinkedReelsModal'
 import RemovePostModal from '../components/RemovePostModal'
+import ContentMatchingModal from '../components/ContentMatchingModal'
 import { usePageTitle } from '../hooks/usePageTitle'
 import { formatCurrency, formatViews } from '../utils/formatters'
 
 export default function Posts() {
   usePageTitle('Posts')
   const [filters, setFilters] = useState({
-    status: 'live',
+    status: 'all',
     type: '',
     search: ''
   })
@@ -23,6 +25,8 @@ export default function Posts() {
   const [isLinkToVideoModalOpen, setIsLinkToVideoModalOpen] = useState(false)
   const [isViewReelsModalOpen, setIsViewReelsModalOpen] = useState(false)
   const [isRemoveModalOpen, setIsRemoveModalOpen] = useState(false)
+  const [showMatchingModal, setShowMatchingModal] = useState(false)
+  const [newPostsForMatching, setNewPostsForMatching] = useState([])
   const [selectedReel, setSelectedReel] = useState(null)
   const [selectedVideo, setSelectedVideo] = useState(null)
   const [sortConfig, setSortConfig] = useState({
@@ -160,8 +164,43 @@ export default function Posts() {
     <div>
       <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Posts</h1>
 
+      {/* Actions Bar */}
+      <div className="mt-6 flex justify-between items-center">
+        <h2 className="text-lg font-medium text-gray-900 dark:text-white">Content Management</h2>
+        <button
+          onClick={() => {
+            // Open matching modal to manually match posts
+            const unlinkedPosts = posts?.posts?.filter(p => 
+              p.status === 'live' &&
+              (!p.originalPostId || p.originalPostId === p.postId) &&
+              p.iterationNumber <= 1
+            ) || []
+            
+            console.log('Manual match - All posts:', posts?.posts?.length)
+            console.log('Manual match - Unlinked posts found:', unlinkedPosts.length)
+            console.log('Manual match - Unlinked posts:', unlinkedPosts.map(p => ({
+              id: p.postId,
+              title: p.title,
+              iterationNumber: p.iterationNumber,
+              originalPostId: p.originalPostId
+            })))
+            
+            if (unlinkedPosts.length > 0) {
+              setNewPostsForMatching(unlinkedPosts)
+              setShowMatchingModal(true)
+            } else {
+              toast.info('No unlinked posts found')
+            }
+          }}
+          className="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        >
+          <LinkIcon className="h-4 w-4 mr-2" />
+          Match Content
+        </button>
+      </div>
+
       {/* Filters */}
-      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-4">
+      <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
           <select
@@ -169,9 +208,9 @@ export default function Posts() {
             onChange={(e) => setFilters({ ...filters, status: e.target.value })}
             className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
           >
+            <option value="all">All Statuses</option>
             <option value="live">Live</option>
             <option value="removed">Removed</option>
-            <option value="all">All Statuses</option>
           </select>
         </div>
 
@@ -531,6 +570,19 @@ export default function Posts() {
         }}
         onSuccess={() => {
           // Refresh posts data
+          window.location.reload()
+        }}
+      />
+      
+      <ContentMatchingModal
+        newPosts={newPostsForMatching}
+        isOpen={showMatchingModal}
+        onClose={() => {
+          setShowMatchingModal(false)
+          setNewPostsForMatching([])
+        }}
+        onSuccess={() => {
+          toast.success('Content successfully linked to previous iterations')
           window.location.reload()
         }}
       />

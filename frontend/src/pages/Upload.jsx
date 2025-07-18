@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { useDropzone } from 'react-dropzone'
-import { CloudArrowUpIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline'
+import { CloudArrowUpIcon, ExclamationTriangleIcon, LinkIcon } from '@heroicons/react/24/outline'
 import { toast } from 'react-hot-toast'
 import api from '../utils/api'
+import ContentMatchingModal from '../components/ContentMatchingModal'
 import { usePageTitle } from '../hooks/usePageTitle'
 import { formatDate } from '../utils/formatters'
 
@@ -13,6 +14,8 @@ export default function Upload() {
   const [snapshotDate, setSnapshotDate] = useState(new Date().toISOString().split('T')[0])
   const [duplicateWarning, setDuplicateWarning] = useState(null)
   const [pendingFile, setPendingFile] = useState(null)
+  const [showMatchingModal, setShowMatchingModal] = useState(false)
+  const [newPostsForMatching, setNewPostsForMatching] = useState([])
 
   const checkForDuplicates = async (file) => {
     const formData = new FormData()
@@ -43,6 +46,39 @@ export default function Upload() {
       
       setUploadResults(response.data.results)
       toast.success('File uploaded successfully!')
+      
+      // Check if there are new posts that might be re-uploads
+      if (response.data.summary?.newPosts > 0) {
+        console.log('New posts created:', response.data.summary.newPosts)
+        
+        // Get the newly created posts
+        const newPostsResponse = await api.get('/posts', {
+          params: {
+            limit: response.data.summary.newPosts,
+            status: 'live',
+            // Get posts created in the last 5 minutes
+            createdAfter: new Date(Date.now() - 300000).toISOString()
+          }
+        })
+        
+        console.log('Upload summary:', response.data.summary)
+        console.log('New posts query params:', {
+          limit: response.data.summary.newPosts,
+          status: 'live',
+          createdAfter: new Date(Date.now() - 300000).toISOString()
+        })
+        console.log('New posts response:', newPostsResponse.data)
+        console.log('Found new posts:', newPostsResponse.data.posts?.length)
+        
+        if (newPostsResponse.data.posts && newPostsResponse.data.posts.length > 0) {
+          // Show matching modal after a short delay to let user see upload results first
+          setTimeout(() => {
+            console.log('Setting posts for matching:', newPostsResponse.data.posts)
+            setNewPostsForMatching(newPostsResponse.data.posts)
+            setShowMatchingModal(true)
+          }, 1500)
+        }
+      }
     } catch (error) {
       toast.error(error.response?.data?.message || 'Upload failed')
       console.error(error)
@@ -338,6 +374,19 @@ export default function Upload() {
           )}
         </div>
       )}
+      
+      <ContentMatchingModal
+        newPosts={newPostsForMatching}
+        isOpen={showMatchingModal}
+        onClose={() => {
+          setShowMatchingModal(false)
+          setNewPostsForMatching([])
+        }}
+        onSuccess={() => {
+          // Refresh or show success message
+          toast.success('Content successfully linked to previous iterations')
+        }}
+      />
     </div>
   )
 }

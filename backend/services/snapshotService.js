@@ -7,7 +7,8 @@ class SnapshotService {
     const results = {
       created: { posts: 0, snapshots: 0 },
       updated: { posts: 0, snapshots: 0 },
-      errors: []
+      errors: [],
+      summary: { newPosts: 0 }
     };
 
     for (const [postId, postData] of Object.entries(parsedData.aggregated)) {
@@ -69,6 +70,7 @@ class SnapshotService {
 
           if (created) {
             results.created.posts++;
+            results.summary.newPosts++;
             
             // Create iteration record for new posts
             await PostIteration.create({
