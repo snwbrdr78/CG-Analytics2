@@ -154,7 +154,7 @@ export default function Posts() {
                           {format(new Date(post.publishTime), 'MMM d, yyyy')}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          ${latestSnapshot?.lifetimeEarnings?.toFixed(2) || '0.00'}
+                          ${latestSnapshot?.lifetimeEarnings ? Number(latestSnapshot.lifetimeEarnings).toFixed(2) : '0.00'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           {latestSnapshot?.lifetimeQualifiedViews?.toLocaleString() || '-'}

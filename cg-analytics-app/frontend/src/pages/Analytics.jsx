@@ -92,7 +92,7 @@ export default function Analytics() {
                       </div>
                       <div className="text-right">
                         <p className="text-sm font-medium text-gray-900">
-                          ${item.metrics.earnings?.toFixed(2) || '0.00'}
+                          ${item.metrics.earnings ? Number(item.metrics.earnings).toFixed(2) : '0.00'}
                         </p>
                         <p className="text-sm text-gray-500">
                           {item.metrics.views?.toLocaleString() || '0'} views

@@ -26,9 +26,9 @@ export default function Dashboard() {
   const stats = [
     {
       name: 'Total Earnings',
-      value: `$${dashboard?.lifetime?.total_earnings?.toFixed(2) || '0.00'}`,
+      value: `$${dashboard?.lifetime?.total_earnings ? Number(dashboard.lifetime.total_earnings).toFixed(2) : '0.00'}`,
       icon: CurrencyDollarIcon,
-      change: `$${dashboard?.thisMonth?.earnings?.toFixed(2) || '0.00'} this month`
+      change: `$${dashboard?.thisMonth?.earnings ? Number(dashboard.thisMonth.earnings).toFixed(2) : '0.00'} this month`
     },
     {
       name: 'Total Views',
@@ -146,7 +146,7 @@ export default function Dashboard() {
                         {item.post.postType}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        ${item.metrics.earnings?.toFixed(2) || '0.00'}
+                        ${item.metrics.earnings ? Number(item.metrics.earnings).toFixed(2) : '0.00'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {item.metrics.views?.toLocaleString() || '0'}
