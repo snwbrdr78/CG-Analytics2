@@ -16,6 +16,8 @@ export default function Upload() {
   const [pendingFile, setPendingFile] = useState(null)
   const [showMatchingModal, setShowMatchingModal] = useState(false)
   const [newPostsForMatching, setNewPostsForMatching] = useState([])
+  const [fileProgress, setFileProgress] = useState({})
+  const [selectedFiles, setSelectedFiles] = useState([])
 
   const checkForDuplicates = async (file) => {
     const formData = new FormData()
@@ -39,78 +41,128 @@ export default function Upload() {
     formData.append('file', file)
     formData.append('snapshotDate', snapshotDate)
 
-    try {
-      const response = await api.post('/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      })
-      
-      setUploadResults(response.data.results)
-      toast.success('File uploaded successfully!')
-      
-      // Check if there are new posts that might be re-uploads
-      if (response.data.summary?.newPosts > 0) {
-        console.log('New posts created:', response.data.summary.newPosts)
-        
-        // Get the newly created posts
-        const newPostsResponse = await api.get('/posts', {
-          params: {
-            limit: response.data.summary.newPosts,
-            status: 'live',
-            // Get posts created in the last 5 minutes
-            createdAfter: new Date(Date.now() - 300000).toISOString()
-          }
-        })
-        
-        console.log('Upload summary:', response.data.summary)
-        console.log('New posts query params:', {
+    const response = await api.post('/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
+    
+    // Store new posts for potential matching at the end
+    if (response.data.summary?.newPosts > 0) {
+      const newPostsResponse = await api.get('/posts', {
+        params: {
           limit: response.data.summary.newPosts,
           status: 'live',
           createdAfter: new Date(Date.now() - 300000).toISOString()
-        })
-        console.log('New posts response:', newPostsResponse.data)
-        console.log('Found new posts:', newPostsResponse.data.posts?.length)
-        
-        if (newPostsResponse.data.posts && newPostsResponse.data.posts.length > 0) {
-          // Show matching modal after a short delay to let user see upload results first
-          setTimeout(() => {
-            console.log('Setting posts for matching:', newPostsResponse.data.posts)
-            setNewPostsForMatching(newPostsResponse.data.posts)
-            setShowMatchingModal(true)
-          }, 1500)
         }
+      })
+      
+      if (newPostsResponse.data.posts && newPostsResponse.data.posts.length > 0) {
+        setNewPostsForMatching(prev => [...prev, ...newPostsResponse.data.posts])
       }
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Upload failed')
-      console.error(error)
     }
+    
+    return response.data
   }
 
   const onDrop = async (acceptedFiles) => {
-    const file = acceptedFiles[0]
-    if (!file) return
+    if (!acceptedFiles || acceptedFiles.length === 0) return
 
     setUploading(true)
-    setPendingFile(file)
-    setDuplicateWarning(null)
-
-    try {
-      // Check for duplicates first
-      const duplicateCheck = await checkForDuplicates(file)
-      
-      if (duplicateCheck.isDuplicate) {
-        setDuplicateWarning(duplicateCheck)
-        setUploading(false)
-        return
-      }
-      
-      // No duplicates, proceed with upload
-      await uploadFile(file)
-    } catch (error) {
-      toast.error('Upload failed')
-      console.error(error)
-    } finally {
-      setUploading(false)
+    setSelectedFiles(acceptedFiles)
+    setUploadResults(null)
+    setFileProgress({})
+    
+    const results = {
+      totalFiles: acceptedFiles.length,
+      successful: 0,
+      failed: 0,
+      created: { posts: 0, snapshots: 0 },
+      updated: { posts: 0, snapshots: 0 },
+      errors: [],
+      files: []
     }
+
+    // Process files sequentially to avoid overwhelming the server
+    for (let i = 0; i < acceptedFiles.length; i++) {
+      const file = acceptedFiles[i]
+      
+      // Update progress
+      setFileProgress(prev => ({
+        ...prev,
+        [file.name]: { status: 'processing', progress: 0 }
+      }))
+
+      try {
+        // Check for duplicates first
+        const duplicateCheck = await checkForDuplicates(file)
+        
+        if (duplicateCheck.isDuplicate) {
+          setFileProgress(prev => ({
+            ...prev,
+            [file.name]: { 
+              status: 'duplicate', 
+              progress: 100,
+              existingDate: duplicateCheck.existingDate 
+            }
+          }))
+          results.failed++
+          results.errors.push({
+            file: file.name,
+            error: `Duplicate data detected (existing date: ${duplicateCheck.existingDate})`
+          })
+          continue
+        }
+        
+        // No duplicates, proceed with upload
+        const response = await uploadFile(file)
+        
+        if (response) {
+          results.successful++
+          results.created.posts += response.results?.created?.posts || 0
+          results.created.snapshots += response.results?.created?.snapshots || 0
+          results.updated.posts += response.results?.updated?.posts || 0
+          results.updated.snapshots += response.results?.updated?.snapshots || 0
+          
+          setFileProgress(prev => ({
+            ...prev,
+            [file.name]: { status: 'completed', progress: 100 }
+          }))
+          
+          results.files.push({
+            name: file.name,
+            status: 'success',
+            results: response.results
+          })
+        }
+      } catch (error) {
+        results.failed++
+        results.errors.push({
+          file: file.name,
+          error: error.response?.data?.message || 'Upload failed'
+        })
+        
+        setFileProgress(prev => ({
+          ...prev,
+          [file.name]: { status: 'failed', progress: 100, error: error.message }
+        }))
+      }
+    }
+    
+    setUploadResults(results)
+    
+    if (results.successful > 0) {
+      toast.success(`Successfully uploaded ${results.successful} of ${results.totalFiles} files`)
+      
+      // Show matching modal if there are new posts
+      if (newPostsForMatching.length > 0) {
+        setTimeout(() => {
+          setShowMatchingModal(true)
+        }, 1500)
+      }
+    } else {
+      toast.error('All uploads failed')
+    }
+    
+    setUploading(false)
   }
 
   const handleUpdateDate = async () => {
@@ -176,7 +228,7 @@ export default function Upload() {
   const { getRootProps, getInputProps } = useDropzone({
     onDrop,
     accept: { 'text/csv': ['.csv'] },
-    maxFiles: 1,
+    multiple: true,
     disabled: uploading
   })
 
@@ -216,11 +268,11 @@ export default function Upload() {
             <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
               {uploading 
                 ? 'Uploading...' 
-                : 'Drop Facebook CSV here or click to browse'
+                : 'Drop Facebook CSV files here or click to browse'
               }
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              CSV files only
+              CSV files only - Multiple files supported
             </p>
           </div>
           <div className="mt-4">
@@ -270,6 +322,57 @@ export default function Upload() {
           </div>
         </div>
       </div>
+
+      {/* File Upload Progress */}
+      {uploading && selectedFiles.length > 0 && (
+        <div className="mt-6 bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+            Upload Progress
+          </h3>
+          <div className="space-y-3">
+            {selectedFiles.map((file) => {
+              const progress = fileProgress[file.name] || { status: 'pending', progress: 0 }
+              return (
+                <div key={file.name} className="relative">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
+                      {file.name}
+                    </span>
+                    <span className={`text-sm font-medium ${
+                      progress.status === 'completed' ? 'text-green-600 dark:text-green-400' :
+                      progress.status === 'failed' ? 'text-red-600 dark:text-red-400' :
+                      progress.status === 'duplicate' ? 'text-amber-600 dark:text-amber-400' :
+                      'text-blue-600 dark:text-blue-400'
+                    }`}>
+                      {progress.status === 'pending' ? 'Waiting...' :
+                       progress.status === 'processing' ? 'Processing...' :
+                       progress.status === 'completed' ? 'Complete' :
+                       progress.status === 'duplicate' ? `Duplicate (${progress.existingDate})` :
+                       'Failed'}
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div 
+                      className={`h-2 rounded-full transition-all duration-300 ${
+                        progress.status === 'completed' ? 'bg-green-600 dark:bg-green-400' :
+                        progress.status === 'failed' ? 'bg-red-600 dark:bg-red-400' :
+                        progress.status === 'duplicate' ? 'bg-amber-600 dark:bg-amber-400' :
+                        'bg-blue-600 dark:bg-blue-400'
+                      }`}
+                      style={{ width: `${progress.progress || 0}%` }}
+                    />
+                  </div>
+                  {progress.error && (
+                    <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+                      {progress.error}
+                    </p>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Duplicate Warning Dialog */}
       {duplicateWarning && (
@@ -322,6 +425,26 @@ export default function Upload() {
           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
             Upload Results
           </h3>
+          
+          {/* File Summary */}
+          <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Files Processed: {uploadResults.totalFiles}
+              </span>
+              <div className="flex items-center space-x-4 text-sm">
+                <span className="flex items-center text-green-600 dark:text-green-400">
+                  ✓ {uploadResults.successful} successful
+                </span>
+                {uploadResults.failed > 0 && (
+                  <span className="flex items-center text-red-600 dark:text-red-400">
+                    ✗ {uploadResults.failed} failed
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+          
           <dl className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             <div>
               <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Posts Created</dt>
@@ -351,11 +474,15 @@ export default function Upload() {
           
           {uploadResults.errors?.length > 0 && (
             <div className="mt-4">
-              <h4 className="text-sm font-medium text-gray-900">Errors:</h4>
-              <ul className="mt-2 text-sm text-red-600 list-disc list-inside">
+              <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100">Errors:</h4>
+              <ul className="mt-2 text-sm text-red-600 dark:text-red-400 space-y-1">
                 {uploadResults.errors.map((error, idx) => (
                   <li key={idx}>
-                    Post {error.postId}: {error.error}
+                    {error.file ? (
+                      <span><strong>{error.file}:</strong> {error.error}</span>
+                    ) : (
+                      <span>Post {error.postId}: {error.error}</span>
+                    )}
                   </li>
                 ))}
               </ul>

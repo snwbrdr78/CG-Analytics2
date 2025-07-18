@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useQuery } from 'react-query'
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid'
+import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline'
 import api from '../utils/api'
 import { usePageTitle } from '../hooks/usePageTitle'
 import { formatCurrency, formatViews, formatCompactNumber } from '../utils/formatters'
@@ -124,13 +125,26 @@ export default function Analytics() {
                             {item.post.postType} • {item.post.Artist?.name || 'Unassigned'}
                           </p>
                         </div>
-                        <div className="text-right">
-                          <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                            {formatCurrency(item.metrics.earnings || 0)}
-                          </p>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">
-                            {formatViews(item.metrics.views || 0)} views
-                          </p>
+                        <div className="flex items-center space-x-3">
+                          <div className="text-right">
+                            <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                              {formatCurrency(item.metrics.earnings || 0)}
+                            </p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                              {formatViews(item.metrics.views || 0)} views
+                            </p>
+                          </div>
+                          {item.post.permalink && (
+                            <a
+                              href={item.post.permalink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300"
+                              title="View on Facebook"
+                            >
+                              <ArrowTopRightOnSquareIcon className="h-5 w-5" />
+                            </a>
+                          )}
                         </div>
                       </div>
                     </li>
@@ -149,32 +163,47 @@ export default function Analytics() {
         <div className="bg-white dark:bg-gray-800 shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">
             <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">
-              Underperforming Posts (Low CPM)
+              Lowest Earning Videos
             </h3>
             <div className="flow-root">
               {underperforming && underperforming.length > 0 ? (
                 <ul className="-my-5 divide-y divide-gray-200 dark:divide-gray-700">
-                  {underperforming.slice(0, 5).map((post, index) => (
+                  {underperforming.map((post, index) => (
                     <li key={`${post.postId}-underperform-${index}`} className="py-4 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors rounded-md px-2 -mx-2">
                       <div className="flex items-center space-x-4">
                         <div className="flex-shrink-0">
-                          <ArrowDownIcon className="h-5 w-5 text-red-500" />
+                          <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                            #{index + 1}
+                          </span>
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
                             {post.title || 'Untitled'}
                           </p>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">
-                            {formatViews(post.lifetimeQualifiedViews || 0)} views
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                            {post.artist_name || 'Unassigned'} • {formatViews(post.lifetimeQualifiedViews || 0)} views
                           </p>
                         </div>
-                        <div className="text-right">
-                          <p className="text-sm font-semibold text-red-600 dark:text-red-400">
-                            {formatCPM(post.lifetimeEarnings, post.lifetimeQualifiedViews)}
-                          </p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
-                            CPM
-                          </p>
+                        <div className="flex items-center space-x-3">
+                          <div className="text-right">
+                            <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                              {formatCurrency(post.lifetimeEarnings || 0)}
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              {formatCPM(post.lifetimeEarnings, post.lifetimeQualifiedViews)} CPM
+                            </p>
+                          </div>
+                          {post.permalink && (
+                            <a
+                              href={post.permalink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300"
+                              title="View on Facebook"
+                            >
+                              <ArrowTopRightOnSquareIcon className="h-5 w-5" />
+                            </a>
+                          )}
                         </div>
                       </div>
                     </li>

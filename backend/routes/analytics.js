@@ -78,7 +78,8 @@ router.get('/underperforming', async (req, res) => {
           WHEN s."lifetimeQualifiedViews" > 0 
           THEN (s."lifetimeEarnings" / s."lifetimeQualifiedViews") * 1000
           ELSE 0
-        END as earnings_per_1k_views
+        END as earnings_per_1k_views,
+        a."name" as artist_name
       FROM "Posts" p
       JOIN (
         SELECT DISTINCT ON ("postId") 
@@ -88,13 +89,13 @@ router.get('/underperforming', async (req, res) => {
         FROM "Snapshots"
         ORDER BY "postId", "snapshotDate" DESC
       ) s ON p."postId" = s."postId"
+      LEFT JOIN "Artists" a ON p."artistId" = a."id"
       WHERE 
-        s."lifetimeQualifiedViews" > 100000 AND
-        (s."lifetimeEarnings" / s."lifetimeQualifiedViews") * 1000 < :threshold
-      ORDER BY earnings_per_1k_views ASC
-      LIMIT 20
+        p."status" = 'live' AND
+        p."postType" = 'Video'
+      ORDER BY s."lifetimeEarnings" ASC
+      LIMIT 10
     `, {
-      replacements: { threshold: parseFloat(threshold) },
       type: sequelize.QueryTypes.SELECT
     });
 
