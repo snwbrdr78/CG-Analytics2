@@ -137,8 +137,8 @@ export default function Dashboard() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {topPosts?.map((item) => (
-                    <tr key={item.post.postId}>
+                  {topPosts?.map((item, index) => (
+                    <tr key={`${item.post.postId}-${index}`}>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {item.post.title || 'Untitled'}
                       </td>

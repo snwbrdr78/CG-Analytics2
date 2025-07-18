@@ -73,7 +73,7 @@ export default function Analytics() {
             <div className="flow-root">
               <ul className="-my-5 divide-y divide-gray-200">
                 {topPosts?.map((item, idx) => (
-                  <li key={item.post.postId} className="py-4">
+                  <li key={`${item.post.postId}-${idx}`} className="py-4">
                     <div className="flex items-center space-x-4">
                       <div className="flex-shrink-0">
                         <span className="inline-flex items-center justify-center h-8 w-8 rounded-full bg-indigo-500">
@@ -114,8 +114,8 @@ export default function Analytics() {
             </h3>
             <div className="flow-root">
               <ul className="-my-5 divide-y divide-gray-200">
-                {underperforming?.slice(0, 5).map((post) => (
-                  <li key={post.postId} className="py-4">
+                {underperforming?.slice(0, 5).map((post, index) => (
+                  <li key={`${post.postId}-underperform-${index}`} className="py-4">
                     <div className="flex items-center space-x-4">
                       <div className="flex-shrink-0">
                         <ArrowDownIcon className="h-5 w-5 text-red-500" />
