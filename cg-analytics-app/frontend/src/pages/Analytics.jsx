@@ -29,15 +29,15 @@ export default function Analytics() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-gray-900">Analytics</h1>
+      <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Analytics</h1>
 
       {/* Period Selector */}
       <div className="mt-6">
-        <label className="block text-sm font-medium text-gray-700">Time Period</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Time Period</label>
         <select
           value={period}
           onChange={(e) => setPeriod(e.target.value)}
-          className="mt-1 block w-32 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+          className="mt-1 block w-32 rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
         >
           <option value="all">All Time</option>
           <option value="month">This Month</option>
@@ -46,8 +46,8 @@ export default function Analytics() {
       </div>
 
       {/* Earnings Timeline */}
-      <div className="mt-8 bg-white p-6 rounded-lg shadow">
-        <h2 className="text-lg font-medium text-gray-900 mb-4">Earnings Timeline</h2>
+      <div className="mt-8 bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+        <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Earnings Timeline</h2>
         {timeline && timeline.length > 0 && (
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={timeline}>
@@ -65,13 +65,13 @@ export default function Analytics() {
 
       <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Top Performing Posts */}
-        <div className="bg-white shadow rounded-lg">
+        <div className="bg-white dark:bg-gray-800 shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">
-            <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
+            <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">
               Top Performing Posts
             </h3>
             <div className="flow-root">
-              <ul className="-my-5 divide-y divide-gray-200">
+              <ul className="-my-5 divide-y divide-gray-200 dark:divide-gray-700">
                 {topPosts?.map((item, idx) => (
                   <li key={`${item.post.postId}-${idx}`} className="py-4">
                     <div className="flex items-center space-x-4">
@@ -83,18 +83,18 @@ export default function Analytics() {
                         </span>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">
+                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
                           {item.post.title || 'Untitled'}
                         </p>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
                           {item.post.postType} • {item.post.Artist?.name || 'Unassigned'}
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-medium text-gray-900">
+                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
                           ${item.metrics.earnings ? Number(item.metrics.earnings).toFixed(2) : '0.00'}
                         </p>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
                           {item.metrics.views?.toLocaleString() || '0'} views
                         </p>
                       </div>
@@ -107,13 +107,13 @@ export default function Analytics() {
         </div>
 
         {/* Underperforming Posts */}
-        <div className="bg-white shadow rounded-lg">
+        <div className="bg-white dark:bg-gray-800 shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">
-            <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
+            <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">
               Underperforming Posts (Low CPM)
             </h3>
             <div className="flow-root">
-              <ul className="-my-5 divide-y divide-gray-200">
+              <ul className="-my-5 divide-y divide-gray-200 dark:divide-gray-700">
                 {underperforming?.slice(0, 5).map((post, index) => (
                   <li key={`${post.postId}-underperform-${index}`} className="py-4">
                     <div className="flex items-center space-x-4">
@@ -121,18 +121,18 @@ export default function Analytics() {
                         <ArrowDownIcon className="h-5 w-5 text-red-500" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">
+                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
                           {post.title || 'Untitled'}
                         </p>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
                           {post.lifetimeQualifiedViews?.toLocaleString() || '0'} views
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-medium text-red-600">
+                        <p className="text-sm font-medium text-red-600 dark:text-red-400">
                           {formatCPM(post.lifetimeEarnings, post.lifetimeQualifiedViews)}
                         </p>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
                           per 1k views
                         </p>
                       </div>
@@ -146,9 +146,9 @@ export default function Analytics() {
       </div>
 
       {/* Artist Performance */}
-      <div className="mt-8 bg-white shadow rounded-lg">
+      <div className="mt-8 bg-white dark:bg-gray-800 shadow rounded-lg">
         <div className="px-4 py-5 sm:p-6">
-          <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
+          <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">
             Performance by Artist
           </h3>
           {timeline && timeline.length > 0 && (

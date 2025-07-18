@@ -217,10 +217,40 @@ cd frontend && npm test   # Run frontend tests
 - Clear cache if build fails: `cd frontend && rm -rf node_modules/.vite`
 - Ensure all dependencies installed: `npm run install:all`
 
+## Recent Updates
+
+### Dark Mode Implementation
+- Full dark mode support across all pages and components
+- System preference detection with manual toggle
+- Persistent theme preference in localStorage
+- Consistent dark color scheme (gray-800/900 backgrounds)
+
+### UI Enhancements
+- Added Post Type column with styled badges (Video, Reel, Photo)
+- Added Custom Label column for asset tags
+- Improved table layouts and filtering
+
+### Admin Credentials
+- Username: info@comedygeni.us
+- Password: CGAdmin2025!
+
 ## Version History
-### v1.0.0 (Current)
-- Full-stack application with CSV processing
-- Artist management and royalty reporting
-- Performance analytics dashboard
-- Content status tracking (live/removed)
-- JWT authentication system
+### v0.0.3 (2025-01-18)
+- Added comprehensive dark mode support
+- Added Post Type and Custom Label columns to Posts page
+- Updated admin credentials to info@comedygeni.us
+- Cleaned up orphaned files and duplicate code
+- Created comprehensive README.md
+- Fixed all dark mode styling issues
+
+### v0.0.2 (2025-01-17)
+- Set up PostgreSQL 15 database
+- Configured database authentication
+- Created .env configuration
+- Successfully deployed backend with PM2
+- Updated documentation with complete setup instructions
+
+### v0.0.1 (2025-01-17)
+- Initial repository setup
+- Created CLAUDE.md documentation
+- Established versioning strategy

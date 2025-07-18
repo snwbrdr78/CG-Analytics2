@@ -73,12 +73,12 @@ export default function Upload() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-gray-900">Upload Data</h1>
+      <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Upload Data</h1>
       
       <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Facebook Export Upload */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+          <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
             Facebook Export CSV
           </h2>
           <div
@@ -87,28 +87,28 @@ export default function Upload() {
               border-2 border-dashed rounded-lg p-6 text-center cursor-pointer
               transition-colors
               ${uploading 
-                ? 'border-gray-300 bg-gray-50' 
-                : 'border-gray-300 hover:border-indigo-500'
+                ? 'border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700' 
+                : 'border-gray-300 dark:border-gray-600 hover:border-indigo-500 dark:hover:border-indigo-400'
               }
             `}
           >
             <input {...getInputProps()} />
-            <CloudArrowUpIcon className="mx-auto h-12 w-12 text-gray-400" />
-            <p className="mt-2 text-sm text-gray-600">
+            <CloudArrowUpIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
+            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
               {uploading 
                 ? 'Uploading...' 
                 : 'Drop Facebook CSV here or click to browse'
               }
             </p>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
               CSV files only
             </p>
           </div>
         </div>
 
         {/* Owner Mapping Upload */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+          <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
             Owner Mapping CSV
           </h2>
           <div
@@ -117,20 +117,20 @@ export default function Upload() {
               border-2 border-dashed rounded-lg p-6 text-center cursor-pointer
               transition-colors
               ${uploading 
-                ? 'border-gray-300 bg-gray-50' 
-                : 'border-gray-300 hover:border-indigo-500'
+                ? 'border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700' 
+                : 'border-gray-300 dark:border-gray-600 hover:border-indigo-500 dark:hover:border-indigo-400'
               }
             `}
           >
             <input {...getOwnerInputProps()} />
-            <CloudArrowUpIcon className="mx-auto h-12 w-12 text-gray-400" />
-            <p className="mt-2 text-sm text-gray-600">
+            <CloudArrowUpIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
+            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
               {uploading 
                 ? 'Uploading...' 
                 : 'Drop owner mapping CSV here or click to browse'
               }
             </p>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
               Maps posts to artists for royalty calculation
             </p>
           </div>
@@ -139,32 +139,32 @@ export default function Upload() {
 
       {/* Upload Results */}
       {uploadResults && (
-        <div className="mt-8 bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">
+        <div className="mt-8 bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
             Upload Results
           </h3>
           <dl className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             <div>
-              <dt className="text-sm font-medium text-gray-500">Posts Created</dt>
-              <dd className="mt-1 text-2xl font-semibold text-indigo-600">
+              <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Posts Created</dt>
+              <dd className="mt-1 text-2xl font-semibold text-indigo-600 dark:text-indigo-400">
                 {uploadResults.created?.posts || 0}
               </dd>
             </div>
             <div>
-              <dt className="text-sm font-medium text-gray-500">Posts Updated</dt>
-              <dd className="mt-1 text-2xl font-semibold text-green-600">
+              <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Posts Updated</dt>
+              <dd className="mt-1 text-2xl font-semibold text-green-600 dark:text-green-400">
                 {uploadResults.updated?.posts || 0}
               </dd>
             </div>
             <div>
-              <dt className="text-sm font-medium text-gray-500">Snapshots Created</dt>
-              <dd className="mt-1 text-2xl font-semibold text-blue-600">
+              <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Snapshots Created</dt>
+              <dd className="mt-1 text-2xl font-semibold text-blue-600 dark:text-blue-400">
                 {uploadResults.created?.snapshots || 0}
               </dd>
             </div>
             <div>
-              <dt className="text-sm font-medium text-gray-500">Errors</dt>
-              <dd className="mt-1 text-2xl font-semibold text-red-600">
+              <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Errors</dt>
+              <dd className="mt-1 text-2xl font-semibold text-red-600 dark:text-red-400">
                 {uploadResults.errors?.length || 0}
               </dd>
             </div>
