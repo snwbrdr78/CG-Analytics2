@@ -34,6 +34,10 @@ Comedy Genius Analytics is a full-stack application that processes Facebook Crea
 - **Audit Logging**: Complete activity tracking
 - **Password Security**: Strength requirements and change functionality
 
+## Versioning
+
+This project follows a specific semantic versioning schema. Please see [VERSIONING.md](VERSIONING.md) for detailed guidelines on version numbering and updates.
+
 ## Tech Stack
 
 ### Backend

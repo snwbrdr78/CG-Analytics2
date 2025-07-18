@@ -5,6 +5,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Overview
 CG-Analytics is a full-stack web application for tracking Facebook content monetization, managing artist royalties, and analyzing content performance. It processes Facebook Creator Studio CSV exports and provides comprehensive analytics, royalty reporting, and admin management capabilities.
 
+## IMPORTANT: Versioning Requirements
+
+This project uses a specific semantic versioning format: **X.Y.Z** where:
+- **X** = Major version (breaking changes)
+- **Y** = Minor version (new features)
+- **Z** = Build number (ALWAYS equals total commit count)
+
+**CRITICAL**: The build number (Z) must ALWAYS be the total number of commits: `git rev-list --count HEAD`
+
+Before EVERY commit:
+1. Get the current commit count: `git rev-list --count HEAD`
+2. Add 1 to get the new build number
+3. Update ALL package.json files with the new version
+4. Include version updates in your commit
+
+See [VERSIONING.md](VERSIONING.md) for complete guidelines.
+
 ## Tech Stack
 - **Backend**: Node.js, Express.js 4.19.2, PostgreSQL with Sequelize ORM 6.37.3
 - **Frontend**: React 18.3.1, Vite 5.3.3, Tailwind CSS 3.4.6, React Query 3.39.3
