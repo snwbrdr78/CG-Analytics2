@@ -8,6 +8,7 @@ const User = require('./User');
 const ApiKey = require('./ApiKey');
 const Site = require('./Site');
 const AuditLog = require('./AuditLog');
+const PostIteration = require('./PostIteration');
 
 // Define associations
 Artist.hasMany(Post, { foreignKey: 'artistId' });
@@ -29,6 +30,14 @@ ReelLink.belongsTo(Post, { foreignKey: 'reelPostId' });
 Post.hasMany(Post, { as: 'childReels', foreignKey: 'parentPostId' });
 Post.belongsTo(Post, { as: 'parentVideo', foreignKey: 'parentPostId' });
 
+// Iteration relationships
+Post.hasMany(PostIteration, { foreignKey: 'currentPostId' });
+PostIteration.belongsTo(Post, { foreignKey: 'currentPostId' });
+
+// Previous iteration relationship
+Post.hasMany(Post, { as: 'nextIterations', foreignKey: 'previousIterationId' });
+Post.belongsTo(Post, { as: 'previousIteration', foreignKey: 'previousIterationId' });
+
 // User associations
 User.hasMany(ApiKey, { foreignKey: 'userId' });
 ApiKey.belongsTo(User, { foreignKey: 'userId' });
@@ -49,5 +58,6 @@ module.exports = {
   User,
   ApiKey,
   Site,
-  AuditLog
+  AuditLog,
+  PostIteration
 };

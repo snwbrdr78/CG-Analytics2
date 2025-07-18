@@ -1,15 +1,19 @@
 import { useState } from 'react'
 import { useQuery } from 'react-query'
 import { format } from 'date-fns'
-import { MagnifyingGlassIcon, FilmIcon, PhotoIcon, PencilIcon, ChevronUpIcon, ChevronDownIcon, ArrowTopRightOnSquareIcon, LinkIcon } from '@heroicons/react/24/outline'
+import { MagnifyingGlassIcon, FilmIcon, PhotoIcon, PencilIcon, ChevronUpIcon, ChevronDownIcon, ArrowTopRightOnSquareIcon, LinkIcon, MinusCircleIcon } from '@heroicons/react/24/outline'
 import api from '../utils/api'
 import EditPostModal from '../components/EditPostModal'
 import LinkToVideoModal from '../components/LinkToVideoModal'
 import ViewLinkedReelsModal from '../components/ViewLinkedReelsModal'
+import RemovePostModal from '../components/RemovePostModal'
+import { usePageTitle } from '../hooks/usePageTitle'
+import { formatCurrency, formatViews } from '../utils/formatters'
 
 export default function Posts() {
+  usePageTitle('Posts')
   const [filters, setFilters] = useState({
-    status: 'all',
+    status: 'live',
     type: '',
     search: ''
   })
@@ -18,6 +22,7 @@ export default function Posts() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isLinkToVideoModalOpen, setIsLinkToVideoModalOpen] = useState(false)
   const [isViewReelsModalOpen, setIsViewReelsModalOpen] = useState(false)
+  const [isRemoveModalOpen, setIsRemoveModalOpen] = useState(false)
   const [selectedReel, setSelectedReel] = useState(null)
   const [selectedVideo, setSelectedVideo] = useState(null)
   const [sortConfig, setSortConfig] = useState({
@@ -35,6 +40,15 @@ export default function Posts() {
         offset: page * limit
       }
     }).then(res => res.data)
+  )
+  
+  // Fetch parent-child relationship data
+  const { data: relationshipData } = useQuery(
+    ['post-relationships'],
+    () => api.get('/video-reels/all-relationships').then(res => res.data),
+    {
+      refetchInterval: 60000 // Refresh every minute
+    }
   )
 
   const { data: artists } = useQuery('artists',
@@ -62,7 +76,8 @@ export default function Posts() {
     const numEarnings = Number(earnings) || 0
     const numViews = Number(views) || 0
     if (numViews === 0) return '-'
-    return `$${((numEarnings / numViews) * 1000).toFixed(2)}`
+    const cpm = (numEarnings / numViews) * 1000
+    return formatCurrency(cpm)
   }
 
   const handleSort = (key) => {
@@ -154,9 +169,9 @@ export default function Posts() {
             onChange={(e) => setFilters({ ...filters, status: e.target.value })}
             className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
           >
-            <option value="all">All</option>
             <option value="live">Live</option>
             <option value="removed">Removed</option>
+            <option value="all">All Statuses</option>
           </select>
         </div>
 
@@ -250,28 +265,28 @@ export default function Posts() {
                         <SortIcon columnKey="publishTime" />
                       </button>
                     </th>
-                    <th className="w-1/12 px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <th className="w-1/12 px-3 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       <button
                         onClick={() => handleSort('earnings')}
-                        className="group inline-flex items-center space-x-1"
+                        className="group inline-flex items-center space-x-1 justify-end w-full"
                       >
                         <span>Earnings</span>
                         <SortIcon columnKey="earnings" />
                       </button>
                     </th>
-                    <th className="w-1/12 px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <th className="w-1/12 px-3 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       <button
                         onClick={() => handleSort('views')}
-                        className="group inline-flex items-center space-x-1"
+                        className="group inline-flex items-center space-x-1 justify-end w-full"
                       >
                         <span>Views</span>
                         <SortIcon columnKey="views" />
                       </button>
                     </th>
-                    <th className="w-1/12 px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <th className="w-1/12 px-3 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       <button
                         onClick={() => handleSort('cpm')}
-                        className="group inline-flex items-center space-x-1"
+                        className="group inline-flex items-center space-x-1 justify-end w-full"
                       >
                         <span>CPM</span>
                         <SortIcon columnKey="cpm" />
@@ -300,12 +315,38 @@ export default function Posts() {
                     const latestSnapshot = post.Snapshots?.[0]
                     
                     return (
-                      <tr key={post.postId}>
+                      <tr key={post.postId} className="hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
                         <td className="w-2/12 px-3 py-4">
                           <div className="flex items-start">
                             <Icon className="h-5 w-5 text-gray-400 mr-2 flex-shrink-0 mt-0.5" />
-                            <div className="text-sm font-medium text-gray-900 dark:text-gray-100 break-words line-clamp-2">
-                              {post.title || 'Untitled'}
+                            <div className="flex-1">
+                              <div className="text-sm font-medium text-gray-900 dark:text-gray-100 break-words line-clamp-2">
+                                {post.title || 'Untitled'}
+                              </div>
+                              {/* Association indicators */}
+                              <div className="flex items-center gap-2 mt-1">
+                                {/* Reel with parent video indicator */}
+                                {post.parentPostId && (
+                                  <span className="inline-flex items-center text-xs text-blue-600 dark:text-blue-400">
+                                    <LinkIcon className="h-3 w-3 mr-1" />
+                                    <span>Linked to video</span>
+                                  </span>
+                                )}
+                                {/* Video with child reels indicator */}
+                                {['Video', 'Videos'].includes(post.postType) && 
+                                 relationshipData?.videosWithReels?.includes(post.postId) && (
+                                  <span className="inline-flex items-center text-xs text-green-600 dark:text-green-400">
+                                    <FilmIcon className="h-3 w-3 mr-1" />
+                                    <span>{relationshipData.reelCounts[post.postId] || 0} reels</span>
+                                  </span>
+                                )}
+                                {/* Re-upload indicator */}
+                                {post.iterationNumber > 1 && (
+                                  <span className="inline-flex items-center text-xs text-purple-600 dark:text-purple-400">
+                                    <span className="font-medium">Iteration {post.iterationNumber}</span>
+                                  </span>
+                                )}
+                              </div>
                             </div>
                           </div>
                         </td>
@@ -329,13 +370,13 @@ export default function Posts() {
                         <td className="w-1/12 px-3 py-4 text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">
                           {format(new Date(post.publishTime), 'MMM d, yyyy')}
                         </td>
-                        <td className="w-1/12 px-3 py-4 text-sm text-gray-900 dark:text-gray-100 whitespace-nowrap">
-                          ${latestSnapshot?.lifetimeEarnings ? Number(latestSnapshot.lifetimeEarnings).toFixed(2) : '0.00'}
+                        <td className="w-1/12 px-3 py-4 text-sm font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap text-right">
+                          {formatCurrency(latestSnapshot?.lifetimeEarnings || 0)}
                         </td>
-                        <td className="w-1/12 px-3 py-4 text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">
-                          {latestSnapshot?.lifetimeQualifiedViews ? Number(latestSnapshot.lifetimeQualifiedViews).toLocaleString() : '-'}
+                        <td className="w-1/12 px-3 py-4 text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap text-right">
+                          {latestSnapshot?.lifetimeQualifiedViews ? formatViews(latestSnapshot.lifetimeQualifiedViews) : '-'}
                         </td>
-                        <td className="w-1/12 px-3 py-4 text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                        <td className="w-1/12 px-3 py-4 text-sm font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap text-right">
                           {formatCPM(
                             latestSnapshot?.lifetimeEarnings,
                             latestSnapshot?.lifetimeQualifiedViews
@@ -345,7 +386,7 @@ export default function Posts() {
                           <span className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${
                             post.status === 'live' 
                               ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200' 
-                              : 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200'
+                              : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300'
                           }`}>
                             {post.status}
                           </span>
@@ -401,6 +442,18 @@ export default function Posts() {
                             >
                               <PencilIcon className="h-5 w-5" />
                             </button>
+                            {post.status === 'live' && (
+                              <button
+                                onClick={() => {
+                                  setSelectedPost(post)
+                                  setIsRemoveModalOpen(true)
+                                }}
+                                className="text-orange-600 hover:text-orange-900 dark:text-orange-400 dark:hover:text-orange-300"
+                                title="Mark as Removed"
+                              >
+                                <MinusCircleIcon className="h-5 w-5" />
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -466,6 +519,19 @@ export default function Posts() {
         onClose={() => {
           setSelectedVideo(null)
           setIsViewReelsModalOpen(false)
+        }}
+      />
+      
+      <RemovePostModal
+        post={selectedPost}
+        isOpen={isRemoveModalOpen}
+        onClose={() => {
+          setSelectedPost(null)
+          setIsRemoveModalOpen(false)
+        }}
+        onSuccess={() => {
+          // Refresh posts data
+          window.location.reload()
         }}
       />
     </div>

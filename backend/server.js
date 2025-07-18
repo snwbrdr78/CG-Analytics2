@@ -7,13 +7,13 @@ require('dotenv').config();
 const { sequelize } = require('./models');
 const authRoutes = require('./routes/auth');
 const uploadRoutes = require('./routes/upload');
-const uploadCheckRoutes = require('./routes/upload-check');
+const uploadCheckRoutes = require('./routes/uploadCheck');
 const artistRoutes = require('./routes/artists');
 const postRoutes = require('./routes/posts');
 const analyticsRoutes = require('./routes/analytics');
 const reportsRoutes = require('./routes/reports');
 const adminRoutes = require('./routes/admin');
-const videoReelsRoutes = require('./routes/video-reels');
+const videoReelsRoutes = require('./routes/videoReels');
 const { authenticateToken } = require('./middleware/auth');
 
 const app = express();

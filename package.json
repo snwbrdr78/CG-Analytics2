@@ -1,6 +1,6 @@
 {
   "name": "cg-analytics",
-  "version": "1.0.0",
+  "version": "1.1.18",
   "description": "Comedy Genius Analytics Platform for Facebook Content Monetization",
   "scripts": {
     "dev": "concurrently \"npm run backend:dev\" \"npm run frontend:dev\"",
@@ -8,21 +8,46 @@
     "frontend:dev": "cd frontend && npm run dev",
     "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
     "build": "cd frontend && npm run build",
+    "build:all": "npm run build && cd backend && npm run build:check",
     "start": "cd backend && npm start",
-    "start:bg": "./scripts/start-background.sh",
-    "start:dev-bg": "./scripts/start-dev-background.sh",
-    "stop": "./scripts/stop.sh",
+    "start:prod": "NODE_ENV=production pm2 start ecosystem.config.js --env production",
+    "start:bg": "pm2 start ecosystem.config.js",
+    "start:dev-bg": "pm2 start ecosystem.config.js --env development",
+    "stop": "pm2 stop all",
+    "restart": "pm2 restart all",
     "logs": "pm2 logs",
+    "logs:backend": "pm2 logs cg-backend",
+    "logs:frontend": "pm2 logs cg-frontend",
     "status": "pm2 status",
     "monitor": "pm2 monit",
+    "test": "cd backend && npm test && cd ../frontend && npm test",
+    "test:backend": "cd backend && npm test",
+    "test:frontend": "cd frontend && npm test",
+    "lint": "cd backend && npm run lint && cd ../frontend && npm run lint",
+    "lint:backend": "cd backend && npm run lint",
+    "lint:frontend": "cd frontend && npm run lint",
+    "clean": "./cleanup.sh",
+    "deploy": "./deploy.sh",
+    "deploy:prod": "./deploy.sh --env production",
+    "db:migrate": "cd backend && npx sequelize-cli db:migrate",
+    "db:migrate:undo": "cd backend && npx sequelize-cli db:migrate:undo",
+    "db:seed": "cd backend && npx sequelize-cli db:seed:all",
+    "create-admin": "cd backend && npm run create-admin",
     "version:bump": "node scripts/bump-version.js build",
     "version:minor": "node scripts/bump-version.js minor",
-    "version:major": "node scripts/bump-version.js major",
-    "postcommit": "npm run version:bump"
+    "version:major": "node scripts/bump-version.js major"
   },
-  "keywords": ["analytics", "monetization", "facebook", "comedy"],
+  "keywords": ["analytics", "monetization", "facebook", "comedy", "royalties", "content-creator"],
   "author": "Comedy Genius",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/CG-Analytics2.git"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
   "devDependencies": {
     "concurrently": "^8.2.2"
   }

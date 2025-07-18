@@ -10,6 +10,7 @@ import {
 } from '@heroicons/react/24/outline';
 import api from '../../utils/api';
 import { toast } from 'react-hot-toast';
+import { formatDate as formatDateUtil } from '../../utils/formatters';
 
 const AuditLogs = () => {
   const { darkMode } = useTheme();
@@ -78,7 +79,7 @@ const AuditLogs = () => {
   };
 
   const formatDate = (date) => {
-    return new Date(date).toLocaleString();
+    return formatDateUtil(date, true);
   };
 
   const handleFilterSubmit = (e) => {
@@ -103,7 +104,7 @@ const AuditLogs = () => {
       <div className="sm:flex sm:items-center sm:justify-between">
         <div className="flex-1 min-w-0">
           <h2 className={`text-2xl font-bold leading-7 sm:text-3xl sm:truncate ${
-            theme === 'dark' ? 'text-white' : 'text-gray-900'
+            darkMode ? 'text-white' : 'text-gray-900'
           }`}>
             Audit Logs
           </h2>
@@ -112,7 +113,7 @@ const AuditLogs = () => {
           <button
             onClick={() => setShowFilters(!showFilters)}
             className={`inline-flex items-center px-4 py-2 border rounded-md shadow-sm text-sm font-medium ${
-              theme === 'dark'
+              darkMode
                 ? 'border-gray-600 text-gray-300 bg-gray-700 hover:bg-gray-600'
                 : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50'
             }`}
@@ -126,12 +127,12 @@ const AuditLogs = () => {
       {/* Filters */}
       {showFilters && (
         <div className={`mt-4 p-4 rounded-lg ${
-          theme === 'dark' ? 'bg-gray-800' : 'bg-gray-50'
+          darkMode ? 'bg-gray-800' : 'bg-gray-50'
         }`}>
           <form onSubmit={handleFilterSubmit} className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div>
               <label className={`block text-sm font-medium ${
-                theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                darkMode ? 'text-gray-300' : 'text-gray-700'
               }`}>
                 Category
               </label>
@@ -139,7 +140,7 @@ const AuditLogs = () => {
                 value={filters.category}
                 onChange={(e) => setFilters({ ...filters, category: e.target.value })}
                 className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
-                  theme === 'dark'
+                  darkMode
                     ? 'bg-gray-700 border-gray-600 text-white'
                     : 'bg-white border-gray-300 text-gray-900'
                 }`}
@@ -158,7 +159,7 @@ const AuditLogs = () => {
             
             <div>
               <label className={`block text-sm font-medium ${
-                theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                darkMode ? 'text-gray-300' : 'text-gray-700'
               }`}>
                 Status
               </label>
@@ -166,7 +167,7 @@ const AuditLogs = () => {
                 value={filters.status}
                 onChange={(e) => setFilters({ ...filters, status: e.target.value })}
                 className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
-                  theme === 'dark'
+                  darkMode
                     ? 'bg-gray-700 border-gray-600 text-white'
                     : 'bg-white border-gray-300 text-gray-900'
                 }`}
@@ -180,7 +181,7 @@ const AuditLogs = () => {
             
             <div>
               <label className={`block text-sm font-medium ${
-                theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                darkMode ? 'text-gray-300' : 'text-gray-700'
               }`}>
                 Start Date
               </label>
@@ -189,7 +190,7 @@ const AuditLogs = () => {
                 value={filters.startDate}
                 onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
                 className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
-                  theme === 'dark'
+                  darkMode
                     ? 'bg-gray-700 border-gray-600 text-white'
                     : 'bg-white border-gray-300 text-gray-900'
                 }`}
@@ -198,7 +199,7 @@ const AuditLogs = () => {
             
             <div>
               <label className={`block text-sm font-medium ${
-                theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                darkMode ? 'text-gray-300' : 'text-gray-700'
               }`}>
                 End Date
               </label>
@@ -207,7 +208,7 @@ const AuditLogs = () => {
                 value={filters.endDate}
                 onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
                 className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
-                  theme === 'dark'
+                  darkMode
                     ? 'bg-gray-700 border-gray-600 text-white'
                     : 'bg-white border-gray-300 text-gray-900'
                 }`}
@@ -219,7 +220,7 @@ const AuditLogs = () => {
                 type="button"
                 onClick={clearFilters}
                 className={`px-4 py-2 text-sm font-medium rounded-md ${
-                  theme === 'dark'
+                  darkMode
                     ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                 }`}
@@ -239,44 +240,44 @@ const AuditLogs = () => {
 
       {/* Logs Table */}
       <div className={`mt-8 overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg ${
-        theme === 'dark' ? 'bg-gray-800' : 'bg-white'
+        darkMode ? 'bg-gray-800' : 'bg-white'
       }`}>
         <table className="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
-          <thead className={theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}>
+          <thead className={darkMode ? 'bg-gray-900' : 'bg-gray-50'}>
             <tr>
               <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
-                theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                darkMode ? 'text-gray-400' : 'text-gray-500'
               }`}>
                 Time
               </th>
               <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
-                theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                darkMode ? 'text-gray-400' : 'text-gray-500'
               }`}>
                 User
               </th>
               <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
-                theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                darkMode ? 'text-gray-400' : 'text-gray-500'
               }`}>
                 Action
               </th>
               <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
-                theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                darkMode ? 'text-gray-400' : 'text-gray-500'
               }`}>
                 Category
               </th>
               <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
-                theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                darkMode ? 'text-gray-400' : 'text-gray-500'
               }`}>
                 Status
               </th>
               <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
-                theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                darkMode ? 'text-gray-400' : 'text-gray-500'
               }`}>
                 Details
               </th>
             </tr>
           </thead>
-          <tbody className={`divide-y ${theme === 'dark' ? 'divide-gray-700' : 'divide-gray-200'}`}>
+          <tbody className={`divide-y ${darkMode ? 'divide-gray-700' : 'divide-gray-200'}`}>
             {loading ? (
               <tr>
                 <td colSpan="6" className="px-6 py-4 text-center">
@@ -286,7 +287,7 @@ const AuditLogs = () => {
             ) : logs.length === 0 ? (
               <tr>
                 <td colSpan="6" className={`px-6 py-4 text-center ${
-                  theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                  darkMode ? 'text-gray-400' : 'text-gray-500'
                 }`}>
                   No audit logs found
                 </td>
@@ -295,7 +296,7 @@ const AuditLogs = () => {
               logs.map((log) => (
                 <tr key={log.id}>
                   <td className={`px-6 py-4 whitespace-nowrap text-sm ${
-                    theme === 'dark' ? 'text-gray-300' : 'text-gray-500'
+                    darkMode ? 'text-gray-300' : 'text-gray-500'
                   }`}>
                     <div className="flex items-center">
                       <CalendarIcon className="h-4 w-4 mr-1" />
@@ -303,12 +304,12 @@ const AuditLogs = () => {
                     </div>
                   </td>
                   <td className={`px-6 py-4 whitespace-nowrap text-sm ${
-                    theme === 'dark' ? 'text-gray-300' : 'text-gray-900'
+                    darkMode ? 'text-gray-300' : 'text-gray-900'
                   }`}>
                     {log.User?.username || 'System'}
                   </td>
                   <td className={`px-6 py-4 text-sm ${
-                    theme === 'dark' ? 'text-gray-300' : 'text-gray-900'
+                    darkMode ? 'text-gray-300' : 'text-gray-900'
                   }`}>
                     {log.action}
                   </td>
@@ -323,14 +324,14 @@ const AuditLogs = () => {
                     <div className="flex items-center">
                       {getStatusIcon(log.status)}
                       <span className={`ml-2 text-sm ${
-                        theme === 'dark' ? 'text-gray-300' : 'text-gray-500'
+                        darkMode ? 'text-gray-300' : 'text-gray-500'
                       }`}>
                         {log.status}
                       </span>
                     </div>
                   </td>
                   <td className={`px-6 py-4 text-sm ${
-                    theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                    darkMode ? 'text-gray-400' : 'text-gray-500'
                   }`}>
                     {log.details && Object.keys(log.details).length > 0 && (
                       <details className="cursor-pointer">
@@ -369,7 +370,7 @@ const AuditLogs = () => {
               Previous
             </button>
             <span className={`px-3 py-2 text-sm ${
-              theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+              darkMode ? 'text-gray-300' : 'text-gray-700'
             }`}>
               Page {page} of {totalPages}
             </span>

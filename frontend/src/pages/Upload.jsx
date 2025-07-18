@@ -3,8 +3,11 @@ import { useDropzone } from 'react-dropzone'
 import { CloudArrowUpIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline'
 import { toast } from 'react-hot-toast'
 import api from '../utils/api'
+import { usePageTitle } from '../hooks/usePageTitle'
+import { formatDate } from '../utils/formatters'
 
 export default function Upload() {
+  usePageTitle('Upload Data')
   const [uploading, setUploading] = useState(false)
   const [uploadResults, setUploadResults] = useState(null)
   const [snapshotDate, setSnapshotDate] = useState(new Date().toISOString().split('T')[0])
@@ -326,7 +329,7 @@ export default function Upload() {
           {uploadResults.metadata?.snapshotDate && (
             <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-md">
               <p className="text-sm text-blue-700 dark:text-blue-300">
-                <strong>Snapshot Date:</strong> {new Date(uploadResults.metadata.snapshotDate).toLocaleString()}
+                <strong>Snapshot Date:</strong> {formatDate(uploadResults.metadata.snapshotDate, true)}
               </p>
               <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
                 This CSV shows lifetime data as of this date for content created during the reporting period.

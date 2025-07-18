@@ -2,8 +2,11 @@ import { useQuery } from 'react-query'
 import { format } from 'date-fns'
 import { ArchiveBoxXMarkIcon, FilmIcon, PhotoIcon } from '@heroicons/react/24/outline'
 import api from '../utils/api'
+import { usePageTitle } from '../hooks/usePageTitle'
+import { formatCurrency, formatViews, formatNumber } from '../utils/formatters'
 
 export default function RemovedContent() {
+  usePageTitle('Removed Content')
   const { data: removedPosts, isLoading } = useQuery('removed-posts', 
     () => api.get('/posts/status/removed').then(res => res.data)
   )
@@ -31,7 +34,7 @@ export default function RemovedContent() {
         </div>
         <div className="mt-4 sm:mt-0">
           <span className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-indigo-700 dark:text-indigo-300 bg-indigo-100 dark:bg-indigo-900">
-            {report?.totalRemoved || 0} posts removed
+            {formatNumber(report?.totalRemoved || 0)} posts removed
           </span>
         </div>
       </div>
@@ -51,9 +54,9 @@ export default function RemovedContent() {
                   </dt>
                   <dd className="flex items-baseline">
                     <div className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
-                      {removedPosts?.filter(p => 
+                      {formatNumber(removedPosts?.filter(p => 
                         p.postType === 'Video' || p.postType === 'Videos'
-                      ).length || 0}
+                      ).length || 0)}
                     </div>
                   </dd>
                 </dl>
@@ -75,7 +78,7 @@ export default function RemovedContent() {
                   </dt>
                   <dd className="flex items-baseline">
                     <div className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
-                      {removedPosts?.filter(p => p.postType === 'Reel').length || 0}
+                      {formatNumber(removedPosts?.filter(p => p.postType === 'Reel').length || 0)}
                     </div>
                   </dd>
                 </dl>
@@ -97,9 +100,9 @@ export default function RemovedContent() {
                   </dt>
                   <dd className="flex items-baseline">
                     <div className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
-                      ${removedPosts?.reduce((sum, p) => 
+                      {formatCurrency(removedPosts?.reduce((sum, p) => 
                         sum + (p.Snapshots?.[0]?.lifetimeEarnings || 0), 0
-                      ).toFixed(2) || '0.00'}
+                      ) || 0)}
                     </div>
                   </dd>
                 </dl>
@@ -117,7 +120,7 @@ export default function RemovedContent() {
             const Icon = getIcon(post.postType)
             
             return (
-              <li key={post.postId}>
+              <li key={post.postId} className="hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
                 <div className="px-4 py-4 sm:px-6">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
@@ -142,11 +145,11 @@ export default function RemovedContent() {
                     </div>
                     <div className="flex items-center space-x-4">
                       <div className="text-right">
-                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                          ${latestSnapshot?.lifetimeEarnings?.toFixed(2) || '0.00'}
+                        <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                          {formatCurrency(latestSnapshot?.lifetimeEarnings || 0)}
                         </p>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
-                          {latestSnapshot?.lifetimeQualifiedViews?.toLocaleString() || '0'} views
+                          {formatViews(latestSnapshot?.lifetimeQualifiedViews || 0)} views
                         </p>
                       </div>
                       <div className="text-right">

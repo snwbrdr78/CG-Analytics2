@@ -4,6 +4,7 @@ import { Dialog, Transition } from '@headlessui/react'
 import { XMarkIcon, FilmIcon } from '@heroicons/react/24/outline'
 import { format } from 'date-fns'
 import api from '../utils/api'
+import { formatCurrency, formatNumber, formatViews } from '../utils/formatters'
 
 export default function ViewLinkedReelsModal({ video, isOpen, onClose }) {
   const [linkedReels, setLinkedReels] = useState([])
@@ -125,9 +126,9 @@ export default function ViewLinkedReelsModal({ video, isOpen, onClose }) {
                             <div>
                               <p className="text-xs text-gray-500 dark:text-gray-400">Avg CPM</p>
                               <p className="text-lg font-semibold text-gray-900 dark:text-white">
-                                ${aggregateData.aggregates?.totalViews > 0 
-                                  ? ((aggregateData.aggregates.totalEarnings / aggregateData.aggregates.totalViews) * 1000).toFixed(2)
-                                  : '0.00'}
+                                {aggregateData.aggregates?.totalViews > 0 
+                                  ? formatCurrency((aggregateData.aggregates.totalEarnings / aggregateData.aggregates.totalViews) * 1000)
+                                  : formatCurrency(0)}
                               </p>
                             </div>
                             <div>

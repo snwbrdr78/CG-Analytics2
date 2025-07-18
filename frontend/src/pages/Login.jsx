@@ -2,8 +2,10 @@ import { useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { toast } from 'react-hot-toast'
+import { usePageTitle } from '../hooks/usePageTitle'
 
 export default function Login() {
+  usePageTitle('Login')
   const navigate = useNavigate()
   const location = useLocation()
   const { login } = useAuth()
@@ -44,7 +46,11 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
-          <h1 className="text-center text-4xl font-bold text-indigo-600 dark:text-indigo-400">CG Analytics</h1>
+          <img 
+            src="/LOGO-White-NoBackdropCrisp.png" 
+            alt="CG Analytics" 
+            className="mx-auto h-16 w-auto"
+          />
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
             Sign in to your account
           </h2>

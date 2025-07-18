@@ -9,6 +9,7 @@ import {
 } from '@heroicons/react/24/outline';
 import api from '../../utils/api';
 import { toast } from 'react-hot-toast';
+import { formatCurrency, formatNumber, formatDate } from '../../utils/formatters';
 
 const SiteManagement = () => {
   const { darkMode } = useTheme();
@@ -146,7 +147,7 @@ const SiteManagement = () => {
       <div className="sm:flex sm:items-center sm:justify-between">
         <div className="flex-1 min-w-0">
           <h2 className={`text-2xl font-bold leading-7 sm:text-3xl sm:truncate ${
-            theme === 'dark' ? 'text-white' : 'text-gray-900'
+            darkMode ? 'text-white' : 'text-gray-900'
           }`}>
             Site Management
           </h2>
@@ -174,7 +175,7 @@ const SiteManagement = () => {
           </div>
         ) : sites.length === 0 ? (
           <div className={`col-span-full text-center py-8 ${
-            theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+            darkMode ? 'text-gray-400' : 'text-gray-500'
           }`}>
             No sites connected
           </div>
@@ -183,7 +184,7 @@ const SiteManagement = () => {
             <div
               key={site.id}
               className={`relative rounded-lg border p-6 ${
-                theme === 'dark'
+                darkMode
                   ? 'bg-gray-800 border-gray-700'
                   : 'bg-white border-gray-200'
               } shadow-sm hover:shadow-md transition-shadow`}
@@ -193,12 +194,12 @@ const SiteManagement = () => {
                   <span className="text-2xl mr-3">{platformIcons[site.platform]}</span>
                   <div>
                     <h3 className={`text-lg font-medium ${
-                      theme === 'dark' ? 'text-white' : 'text-gray-900'
+                      darkMode ? 'text-white' : 'text-gray-900'
                     }`}>
                       {site.name}
                     </h3>
                     <p className={`text-sm ${
-                      theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                      darkMode ? 'text-gray-400' : 'text-gray-500'
                     }`}>
                       {site.platformId}
                     </p>
@@ -213,19 +214,19 @@ const SiteManagement = () => {
 
               <div className="mt-4 space-y-2">
                 <div className={`text-sm ${
-                  theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
+                  darkMode ? 'text-gray-300' : 'text-gray-600'
                 }`}>
                   <span className="font-medium">Added by:</span> {site.addedBy?.username || 'Unknown'}
                 </div>
                 <div className={`text-sm ${
-                  theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
+                  darkMode ? 'text-gray-300' : 'text-gray-600'
                 }`}>
                   <span className="font-medium">Last sync:</span> {
-                    site.lastSyncAt ? new Date(site.lastSyncAt).toLocaleString() : 'Never'
+                    site.lastSyncAt ? formatDate(site.lastSyncAt, true) : 'Never'
                   }
                 </div>
                 <div className={`text-sm ${
-                  theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
+                  darkMode ? 'text-gray-300' : 'text-gray-600'
                 }`}>
                   <span className="font-medium">Auto sync:</span> {
                     site.settings?.autoSync ? `Yes (${site.settings.syncInterval})` : 'No'
@@ -235,43 +236,43 @@ const SiteManagement = () => {
 
               {site.stats && (
                 <div className={`mt-4 pt-4 border-t ${
-                  theme === 'dark' ? 'border-gray-700' : 'border-gray-200'
+                  darkMode ? 'border-gray-700' : 'border-gray-200'
                 }`}>
                   <div className="grid grid-cols-3 gap-2 text-center">
                     <div>
                       <p className={`text-sm font-medium ${
-                        theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                        darkMode ? 'text-gray-400' : 'text-gray-500'
                       }`}>
                         Posts
                       </p>
                       <p className={`text-lg font-semibold ${
-                        theme === 'dark' ? 'text-white' : 'text-gray-900'
+                        darkMode ? 'text-white' : 'text-gray-900'
                       }`}>
                         {site.stats.totalPosts || 0}
                       </p>
                     </div>
                     <div>
                       <p className={`text-sm font-medium ${
-                        theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                        darkMode ? 'text-gray-400' : 'text-gray-500'
                       }`}>
                         Views
                       </p>
                       <p className={`text-lg font-semibold ${
-                        theme === 'dark' ? 'text-white' : 'text-gray-900'
+                        darkMode ? 'text-white' : 'text-gray-900'
                       }`}>
-                        {(site.stats.totalViews || 0).toLocaleString()}
+                        {formatNumber(site.stats.totalViews || 0)}
                       </p>
                     </div>
                     <div>
                       <p className={`text-sm font-medium ${
-                        theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                        darkMode ? 'text-gray-400' : 'text-gray-500'
                       }`}>
                         Earnings
                       </p>
                       <p className={`text-lg font-semibold ${
-                        theme === 'dark' ? 'text-white' : 'text-gray-900'
+                        darkMode ? 'text-white' : 'text-gray-900'
                       }`}>
-                        ${(site.stats.totalEarnings || 0).toFixed(2)}
+                        {formatCurrency(site.stats.totalEarnings || 0)}
                       </p>
                     </div>
                   </div>
@@ -280,14 +281,14 @@ const SiteManagement = () => {
 
               {site.syncError && (
                 <div className={`mt-4 p-3 rounded-md ${
-                  theme === 'dark'
+                  darkMode
                     ? 'bg-red-900/20 border border-red-800'
                     : 'bg-red-50 border border-red-200'
                 }`}>
                   <div className="flex">
                     <ExclamationTriangleIcon className="h-5 w-5 text-red-400" />
                     <p className={`ml-2 text-sm ${
-                      theme === 'dark' ? 'text-red-400' : 'text-red-800'
+                      darkMode ? 'text-red-400' : 'text-red-800'
                     }`}>
                       {site.syncError}
                     </p>
@@ -339,7 +340,7 @@ const SiteManagement = () => {
               Previous
             </button>
             <span className={`px-3 py-2 text-sm ${
-              theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+              darkMode ? 'text-gray-300' : 'text-gray-700'
             }`}>
               Page {page} of {totalPages}
             </span>
@@ -365,10 +366,10 @@ const SiteManagement = () => {
             <div className="fixed inset-0 bg-black opacity-50" onClick={() => setShowModal(false)}></div>
             
             <div className={`relative z-50 w-full max-w-md p-6 mx-auto rounded-lg shadow-xl ${
-              theme === 'dark' ? 'bg-gray-800' : 'bg-white'
+              darkMode ? 'bg-gray-800' : 'bg-white'
             }`}>
               <h3 className={`text-lg font-medium mb-4 ${
-                theme === 'dark' ? 'text-white' : 'text-gray-900'
+                darkMode ? 'text-white' : 'text-gray-900'
               }`}>
                 {editingSite ? 'Edit Site' : 'Connect New Site'}
               </h3>
@@ -377,7 +378,7 @@ const SiteManagement = () => {
                 <div className="space-y-4">
                   <div>
                     <label className={`block text-sm font-medium ${
-                      theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                      darkMode ? 'text-gray-300' : 'text-gray-700'
                     }`}>
                       Site Name
                     </label>
@@ -387,7 +388,7 @@ const SiteManagement = () => {
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
-                        theme === 'dark'
+                        darkMode
                           ? 'bg-gray-700 border-gray-600 text-white'
                           : 'bg-white border-gray-300 text-gray-900'
                       }`}
@@ -397,7 +398,7 @@ const SiteManagement = () => {
                   
                   <div>
                     <label className={`block text-sm font-medium ${
-                      theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                      darkMode ? 'text-gray-300' : 'text-gray-700'
                     }`}>
                       Platform
                     </label>
@@ -405,7 +406,7 @@ const SiteManagement = () => {
                       value={formData.platform}
                       onChange={(e) => setFormData({ ...formData, platform: e.target.value })}
                       className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
-                        theme === 'dark'
+                        darkMode
                           ? 'bg-gray-700 border-gray-600 text-white'
                           : 'bg-white border-gray-300 text-gray-900'
                       }`}
@@ -421,7 +422,7 @@ const SiteManagement = () => {
                     <>
                       <div>
                         <label className={`block text-sm font-medium ${
-                          theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                          darkMode ? 'text-gray-300' : 'text-gray-700'
                         }`}>
                           Page/Channel ID
                         </label>
@@ -431,7 +432,7 @@ const SiteManagement = () => {
                           value={formData.platformId}
                           onChange={(e) => setFormData({ ...formData, platformId: e.target.value })}
                           className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
-                            theme === 'dark'
+                            darkMode
                               ? 'bg-gray-700 border-gray-600 text-white'
                               : 'bg-white border-gray-300 text-gray-900'
                           }`}
@@ -441,7 +442,7 @@ const SiteManagement = () => {
                       
                       <div>
                         <label className={`block text-sm font-medium ${
-                          theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                          darkMode ? 'text-gray-300' : 'text-gray-700'
                         }`}>
                           Access Token
                         </label>
@@ -450,7 +451,7 @@ const SiteManagement = () => {
                           value={formData.accessToken}
                           onChange={(e) => setFormData({ ...formData, accessToken: e.target.value })}
                           className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
-                            theme === 'dark'
+                            darkMode
                               ? 'bg-gray-700 border-gray-600 text-white'
                               : 'bg-white border-gray-300 text-gray-900'
                           }`}
@@ -463,7 +464,7 @@ const SiteManagement = () => {
                   
                   <div>
                     <label className={`block text-sm font-medium mb-2 ${
-                      theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                      darkMode ? 'text-gray-300' : 'text-gray-700'
                     }`}>
                       Settings
                     </label>
@@ -479,7 +480,7 @@ const SiteManagement = () => {
                           className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                         />
                         <span className={`ml-2 ${
-                          theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                          darkMode ? 'text-gray-300' : 'text-gray-700'
                         }`}>
                           Enable auto-sync
                         </span>
@@ -488,7 +489,7 @@ const SiteManagement = () => {
                       {formData.settings.autoSync && (
                         <div className="ml-6">
                           <label className={`block text-sm ${
-                            theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                            darkMode ? 'text-gray-400' : 'text-gray-600'
                           }`}>
                             Sync Interval
                           </label>
@@ -499,7 +500,7 @@ const SiteManagement = () => {
                               settings: { ...formData.settings, syncInterval: e.target.value }
                             })}
                             className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
-                              theme === 'dark'
+                              darkMode
                                 ? 'bg-gray-700 border-gray-600 text-white'
                                 : 'bg-white border-gray-300 text-gray-900'
                             }`}
@@ -519,7 +520,7 @@ const SiteManagement = () => {
                     type="button"
                     onClick={() => setShowModal(false)}
                     className={`px-4 py-2 text-sm font-medium rounded-md ${
-                      theme === 'dark'
+                      darkMode
                         ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                         : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                     }`}

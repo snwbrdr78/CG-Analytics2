@@ -332,4 +332,37 @@ router.get('/video/:videoId/check-children', async (req, res) => {
   }
 });
 
+// Get all parent-child relationships for display
+router.get('/all-relationships', async (req, res) => {
+  try {
+    // Get count of reels for each video
+    const reelCounts = await sequelize.query(`
+      SELECT "parentPostId", COUNT(*) as count
+      FROM "Posts"
+      WHERE "parentPostId" IS NOT NULL
+      GROUP BY "parentPostId"
+    `, {
+      type: sequelize.QueryTypes.SELECT
+    });
+    
+    const reelCountMap = {};
+    const videosWithReels = [];
+    
+    reelCounts.forEach(item => {
+      reelCountMap[item.parentPostId] = parseInt(item.count);
+      videosWithReels.push(item.parentPostId);
+    });
+    
+    res.json({
+      success: true,
+      videosWithReels,
+      reelCounts: reelCountMap
+    });
+    
+  } catch (error) {
+    console.error('Error fetching relationships:', error);
+    res.status(500).json({ error: 'Failed to fetch relationships' });
+  }
+});
+
 module.exports = router;

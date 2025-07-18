@@ -1,5 +1,5 @@
 const { Op } = require('sequelize');
-const { Post, Snapshot, Artist, Delta, sequelize } = require('../models');
+const { Post, Snapshot, Artist, Delta, PostIteration, sequelize } = require('../models');
 const dayjs = require('dayjs');
 
 class SnapshotService {
@@ -15,6 +15,35 @@ class SnapshotService {
       const transaction = await sequelize.transaction();
       
       try {
+          // Check if this is a re-upload of previously removed content
+          let previousIteration = null;
+          let iterationNumber = 1;
+          let originalPostId = postId;
+          
+          if (postData.title && postData.postType && postData.publishTime) {
+            const previousPosts = await Post.findAll({
+              where: {
+                title: postData.title,
+                postType: postData.postType,
+                status: 'removed',
+                publishTime: {
+                  [Op.lt]: postData.publishTime // Earlier than current publish time
+                }
+              },
+              order: [['iterationNumber', 'DESC']],
+              limit: 1,
+              transaction
+            });
+            
+            if (previousPosts.length > 0) {
+              previousIteration = previousPosts[0];
+              iterationNumber = (previousIteration.iterationNumber || 1) + 1;
+              originalPostId = previousIteration.originalPostId || previousIteration.postId;
+              
+              console.log(`🔄 Detected re-upload: "${postData.title}" - Iteration ${iterationNumber}`);
+            }
+          }
+
           // Create or update post
           const [post, created] = await Post.findOrCreate({
             where: { postId },
@@ -29,13 +58,27 @@ class SnapshotService {
               permalink: postData.permalink,
               captionType: postData.captionType,
               pageId: postData.pageId,
-              pageName: postData.pageName
+              pageName: postData.pageName,
+              iterationNumber,
+              originalPostId,
+              previousIterationId: previousIteration ? previousIteration.postId : null,
+              artistId: previousIteration ? previousIteration.artistId : null // Inherit artist
             },
             transaction
           });
 
           if (created) {
             results.created.posts++;
+            
+            // Create iteration record for new posts
+            await PostIteration.create({
+              originalPostId,
+              currentPostId: postId,
+              iterationNumber,
+              uploadDate: postData.publishTime,
+              removalDate: null,
+              reason: null
+            }, { transaction });
           } else {
             // Update post if needed
             if (postData.assetTag && !post.assetTag) {

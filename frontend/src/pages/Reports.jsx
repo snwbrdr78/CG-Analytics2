@@ -3,8 +3,11 @@ import { useQuery } from 'react-query'
 import { format } from 'date-fns'
 import { DocumentArrowDownIcon } from '@heroicons/react/24/outline'
 import api from '../utils/api'
+import { usePageTitle } from '../hooks/usePageTitle'
+import { formatCurrency, formatNumber, formatPercentage } from '../utils/formatters'
 
 export default function Reports() {
+  usePageTitle('Reports')
   const currentDate = new Date()
   const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth() + 1)
   const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear())
@@ -110,9 +113,10 @@ export default function Reports() {
               <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white">
                 {months[selectedMonth - 1]} {selectedYear} Royalty Report
               </h3>
-              <p className="mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400">
-                Total Earnings: ${monthlyReport.summary?.totalEarnings?.toFixed(2) || '0.00'} | 
-                Total Royalties: ${monthlyReport.summary?.totalRoyalties?.toFixed(2) || '0.00'}
+              <p className="mt-1 max-w-2xl text-sm text-gray-600 dark:text-gray-400">
+                <span className="font-medium">Total Earnings:</span> <span className="text-gray-900 dark:text-gray-100 font-semibold">{formatCurrency(monthlyReport.summary?.totalEarnings || 0)}</span>
+                <span className="mx-2 text-gray-400">|</span>
+                <span className="font-medium">Total Royalties:</span> <span className="text-gray-900 dark:text-gray-100 font-semibold">{formatCurrency(monthlyReport.summary?.totalRoyalties || 0)}</span>
               </p>
             </div>
             
@@ -123,43 +127,43 @@ export default function Reports() {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Artist
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Total Earnings
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Views
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Posts
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Royalty Rate
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Royalty Owed
                     </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                   {monthlyReport.report?.map((row) => (
-                    <tr key={row.artist.id}>
+                    <tr key={row.artist.id} className="hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
                         {row.artist.name}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                        ${row.metrics.totalEarnings.toFixed(2)}
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100 text-right">
+                        {formatCurrency(row.metrics.totalEarnings)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                        {row.metrics.totalViews.toLocaleString()}
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400 text-right">
+                        {formatNumber(row.metrics.totalViews)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                        {row.metrics.postCount}
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400 text-center">
+                        {formatNumber(row.metrics.postCount)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                        {row.royalty.rate}%
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400 text-center">
+                        {formatPercentage(row.royalty.rate)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
-                        ${row.royalty.owed.toFixed(2)}
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-indigo-600 dark:text-indigo-400 text-right">
+                        {formatCurrency(row.royalty.owed)}
                       </td>
                     </tr>
                   ))}
@@ -189,16 +193,16 @@ export default function Reports() {
                   <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
                     Total Earnings
                   </dt>
-                  <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100">
-                    ${quarterlyReport.summary?.totalEarnings?.toFixed(2) || '0.00'}
+                  <dd className="mt-1 text-2xl font-semibold text-gray-900 dark:text-gray-100">
+                    {formatCurrency(quarterlyReport.summary?.totalEarnings || 0)}
                   </dd>
                 </div>
                 <div className="sm:col-span-1">
                   <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
                     Total Views
                   </dt>
-                  <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100">
-                    {quarterlyReport.summary?.totalViews?.toLocaleString() || '0'}
+                  <dd className="mt-1 text-2xl font-semibold text-gray-900 dark:text-gray-100">
+                    {formatNumber(quarterlyReport.summary?.totalViews || 0)}
                   </dd>
                 </div>
               </dl>

@@ -124,7 +124,7 @@ const UserManagement = () => {
       <div className="sm:flex sm:items-center sm:justify-between">
         <div className="flex-1 min-w-0">
           <h2 className={`text-2xl font-bold leading-7 sm:text-3xl sm:truncate ${
-            theme === 'dark' ? 'text-white' : 'text-gray-900'
+            darkMode ? 'text-white' : 'text-gray-900'
           }`}>
             User Management
           </h2>
@@ -154,7 +154,7 @@ const UserManagement = () => {
       <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label className={`block text-sm font-medium ${
-            theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+            darkMode ? 'text-gray-300' : 'text-gray-700'
           }`}>
             Search
           </label>
@@ -167,7 +167,7 @@ const UserManagement = () => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className={`block w-full pl-10 pr-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 sm:text-sm ${
-                theme === 'dark'
+                darkMode
                   ? 'bg-gray-700 border-gray-600 text-white'
                   : 'bg-white border-gray-300 text-gray-900'
               }`}
@@ -178,7 +178,7 @@ const UserManagement = () => {
         
         <div>
           <label className={`block text-sm font-medium ${
-            theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+            darkMode ? 'text-gray-300' : 'text-gray-700'
           }`}>
             Role Filter
           </label>
@@ -186,7 +186,7 @@ const UserManagement = () => {
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
             className={`mt-1 block w-full pl-3 pr-10 py-2 text-base border focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md ${
-              theme === 'dark'
+              darkMode
                 ? 'bg-gray-700 border-gray-600 text-white'
                 : 'bg-white border-gray-300 text-gray-900'
             }`}
@@ -203,39 +203,39 @@ const UserManagement = () => {
 
       {/* Users Table */}
       <div className={`mt-8 overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg ${
-        theme === 'dark' ? 'bg-gray-800' : 'bg-white'
+        darkMode ? 'bg-gray-800' : 'bg-white'
       }`}>
         <table className="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
-          <thead className={theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}>
+          <thead className={darkMode ? 'bg-gray-900' : 'bg-gray-50'}>
             <tr>
               <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
-                theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                darkMode ? 'text-gray-400' : 'text-gray-500'
               }`}>
                 User
               </th>
               <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
-                theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                darkMode ? 'text-gray-400' : 'text-gray-500'
               }`}>
                 Role
               </th>
               <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
-                theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                darkMode ? 'text-gray-400' : 'text-gray-500'
               }`}>
                 Status
               </th>
               <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
-                theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                darkMode ? 'text-gray-400' : 'text-gray-500'
               }`}>
                 Last Login
               </th>
               <th className={`px-6 py-3 text-right text-xs font-medium uppercase tracking-wider ${
-                theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                darkMode ? 'text-gray-400' : 'text-gray-500'
               }`}>
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className={`divide-y ${theme === 'dark' ? 'divide-gray-700' : 'divide-gray-200'}`}>
+          <tbody className={`divide-y ${darkMode ? 'divide-gray-700' : 'divide-gray-200'}`}>
             {loading ? (
               <tr>
                 <td colSpan="5" className="px-6 py-4 text-center">
@@ -245,7 +245,7 @@ const UserManagement = () => {
             ) : users.length === 0 ? (
               <tr>
                 <td colSpan="5" className={`px-6 py-4 text-center ${
-                  theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                  darkMode ? 'text-gray-400' : 'text-gray-500'
                 }`}>
                   No users found
                 </td>
@@ -256,12 +256,12 @@ const UserManagement = () => {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div>
                       <div className={`text-sm font-medium ${
-                        theme === 'dark' ? 'text-white' : 'text-gray-900'
+                        darkMode ? 'text-white' : 'text-gray-900'
                       }`}>
                         {user.username}
                       </div>
                       <div className={`text-sm ${
-                        theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                        darkMode ? 'text-gray-400' : 'text-gray-500'
                       }`}>
                         {user.email}
                       </div>
@@ -284,7 +284,7 @@ const UserManagement = () => {
                     </span>
                   </td>
                   <td className={`px-6 py-4 whitespace-nowrap text-sm ${
-                    theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                    darkMode ? 'text-gray-400' : 'text-gray-500'
                   }`}>
                     {user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Never'}
                   </td>
@@ -331,7 +331,7 @@ const UserManagement = () => {
               Previous
             </button>
             <span className={`px-3 py-2 text-sm ${
-              theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+              darkMode ? 'text-gray-300' : 'text-gray-700'
             }`}>
               Page {page} of {totalPages}
             </span>
@@ -357,10 +357,10 @@ const UserManagement = () => {
             <div className="fixed inset-0 bg-black opacity-50" onClick={() => setShowModal(false)}></div>
             
             <div className={`relative z-50 w-full max-w-md p-6 mx-auto rounded-lg shadow-xl ${
-              theme === 'dark' ? 'bg-gray-800' : 'bg-white'
+              darkMode ? 'bg-gray-800' : 'bg-white'
             }`}>
               <h3 className={`text-lg font-medium mb-4 ${
-                theme === 'dark' ? 'text-white' : 'text-gray-900'
+                darkMode ? 'text-white' : 'text-gray-900'
               }`}>
                 {editingUser ? 'Edit User' : 'Create New User'}
               </h3>
@@ -369,7 +369,7 @@ const UserManagement = () => {
                 <div className="space-y-4">
                   <div>
                     <label className={`block text-sm font-medium ${
-                      theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                      darkMode ? 'text-gray-300' : 'text-gray-700'
                     }`}>
                       Username
                     </label>
@@ -379,7 +379,7 @@ const UserManagement = () => {
                       value={formData.username}
                       onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                       className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
-                        theme === 'dark'
+                        darkMode
                           ? 'bg-gray-700 border-gray-600 text-white'
                           : 'bg-white border-gray-300 text-gray-900'
                       }`}
@@ -388,7 +388,7 @@ const UserManagement = () => {
                   
                   <div>
                     <label className={`block text-sm font-medium ${
-                      theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                      darkMode ? 'text-gray-300' : 'text-gray-700'
                     }`}>
                       Email
                     </label>
@@ -398,7 +398,7 @@ const UserManagement = () => {
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
-                        theme === 'dark'
+                        darkMode
                           ? 'bg-gray-700 border-gray-600 text-white'
                           : 'bg-white border-gray-300 text-gray-900'
                       }`}
@@ -408,7 +408,7 @@ const UserManagement = () => {
                   {!editingUser && (
                     <div>
                       <label className={`block text-sm font-medium ${
-                        theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                        darkMode ? 'text-gray-300' : 'text-gray-700'
                       }`}>
                         Password
                       </label>
@@ -418,7 +418,7 @@ const UserManagement = () => {
                         value={formData.password}
                         onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                         className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
-                          theme === 'dark'
+                          darkMode
                             ? 'bg-gray-700 border-gray-600 text-white'
                             : 'bg-white border-gray-300 text-gray-900'
                         }`}
@@ -428,7 +428,7 @@ const UserManagement = () => {
                   
                   <div>
                     <label className={`block text-sm font-medium ${
-                      theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                      darkMode ? 'text-gray-300' : 'text-gray-700'
                     }`}>
                       Role
                     </label>
@@ -436,7 +436,7 @@ const UserManagement = () => {
                       value={formData.role}
                       onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                       className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
-                        theme === 'dark'
+                        darkMode
                           ? 'bg-gray-700 border-gray-600 text-white'
                           : 'bg-white border-gray-300 text-gray-900'
                       }`}
@@ -460,7 +460,7 @@ const UserManagement = () => {
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
                     <label htmlFor="isActive" className={`ml-2 block text-sm ${
-                      theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                      darkMode ? 'text-gray-300' : 'text-gray-700'
                     }`}>
                       Active
                     </label>
@@ -472,7 +472,7 @@ const UserManagement = () => {
                     type="button"
                     onClick={() => setShowModal(false)}
                     className={`px-4 py-2 text-sm font-medium rounded-md ${
-                      theme === 'dark'
+                      darkMode
                         ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                         : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                     }`}

@@ -77,6 +77,25 @@ const Post = sequelize.define('Post', {
     type: DataTypes.BOOLEAN,
     defaultValue: true,
     comment: 'Whether reel inherits metadata from parent video'
+  },
+  iterationNumber: {
+    type: DataTypes.INTEGER,
+    defaultValue: 1,
+    comment: 'Which iteration/upload this is (1 = first upload, 2 = re-upload, etc.)'
+  },
+  originalPostId: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    comment: 'Reference to the first iteration of this content'
+  },
+  previousIterationId: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    comment: 'Reference to the previous iteration of this content',
+    references: {
+      model: 'Posts',
+      key: 'postId'
+    }
   }
 }, {
   timestamps: true,

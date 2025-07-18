@@ -17,8 +17,10 @@ import SiteManagement from '../components/admin/SiteManagement';
 import AuditLogs from '../components/admin/AuditLogs';
 import SystemStats from '../components/admin/SystemStats';
 import SystemSettings from '../components/admin/SystemSettings';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 const AdminPanel = () => {
+  usePageTitle('Admin Panel');
   const { user } = useAuth();
   const { darkMode } = useTheme();
   const navigate = useNavigate();
@@ -89,13 +91,13 @@ const AdminPanel = () => {
   const ActiveComponent = availableTabs.find(tab => tab.id === activeTab)?.component || SystemStats;
 
   return (
-    <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
+    <div className={`min-h-screen ${darkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="py-6">
-          <h1 className={`text-3xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+          <h1 className={`text-3xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
             Admin Panel
           </h1>
-          <p className={`mt-2 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+          <p className={`mt-2 text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
             Manage users, API keys, sites, and system settings
           </p>
         </div>
@@ -113,10 +115,10 @@ const AdminPanel = () => {
                   className={`
                     group inline-flex items-center py-4 px-1 border-b-2 font-medium text-sm
                     ${isActive
-                      ? theme === 'dark'
+                      ? darkMode
                         ? 'border-blue-500 text-blue-400'
                         : 'border-blue-500 text-blue-600'
-                      : theme === 'dark'
+                      : darkMode
                         ? 'border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-300'
                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                     }
@@ -126,8 +128,8 @@ const AdminPanel = () => {
                     className={`
                       -ml-0.5 mr-2 h-5 w-5
                       ${isActive
-                        ? theme === 'dark' ? 'text-blue-400' : 'text-blue-500'
-                        : theme === 'dark' ? 'text-gray-500' : 'text-gray-400'
+                        ? darkMode ? 'text-blue-400' : 'text-blue-500'
+                        : darkMode ? 'text-gray-500' : 'text-gray-400'
                       }
                     `}
                   />

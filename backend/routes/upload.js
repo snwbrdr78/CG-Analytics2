@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const FacebookCSVParser = require('../utils/csvParser');
+const FacebookCSVParser = require('../utils/facebookCSVParser');
 const snapshotService = require('../services/snapshotService');
 const fs = require('fs').promises;
 

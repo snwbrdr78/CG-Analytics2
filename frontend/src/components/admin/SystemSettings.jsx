@@ -101,7 +101,7 @@ const SystemSettings = () => {
     <div className="space-y-6">
       <div>
         <label className={`block text-sm font-medium ${
-          theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+          darkMode ? 'text-gray-300' : 'text-gray-700'
         }`}>
           Site Name
         </label>
@@ -110,7 +110,7 @@ const SystemSettings = () => {
           value={settings.general.siteName}
           onChange={(e) => updateSetting('general', 'siteName', e.target.value)}
           className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
-            theme === 'dark'
+            darkMode
               ? 'bg-gray-700 border-gray-600 text-white'
               : 'bg-white border-gray-300 text-gray-900'
           }`}
@@ -119,7 +119,7 @@ const SystemSettings = () => {
 
       <div>
         <label className={`block text-sm font-medium ${
-          theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+          darkMode ? 'text-gray-300' : 'text-gray-700'
         }`}>
           Default Currency
         </label>
@@ -127,7 +127,7 @@ const SystemSettings = () => {
           value={settings.general.defaultCurrency}
           onChange={(e) => updateSetting('general', 'defaultCurrency', e.target.value)}
           className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
-            theme === 'dark'
+            darkMode
               ? 'bg-gray-700 border-gray-600 text-white'
               : 'bg-white border-gray-300 text-gray-900'
           }`}
@@ -141,7 +141,7 @@ const SystemSettings = () => {
 
       <div>
         <label className={`block text-sm font-medium ${
-          theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+          darkMode ? 'text-gray-300' : 'text-gray-700'
         }`}>
           Date Format
         </label>
@@ -149,7 +149,7 @@ const SystemSettings = () => {
           value={settings.general.dateFormat}
           onChange={(e) => updateSetting('general', 'dateFormat', e.target.value)}
           className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
-            theme === 'dark'
+            darkMode
               ? 'bg-gray-700 border-gray-600 text-white'
               : 'bg-white border-gray-300 text-gray-900'
           }`}
@@ -162,7 +162,7 @@ const SystemSettings = () => {
 
       <div>
         <label className={`block text-sm font-medium ${
-          theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+          darkMode ? 'text-gray-300' : 'text-gray-700'
         }`}>
           Time Zone
         </label>
@@ -170,7 +170,7 @@ const SystemSettings = () => {
           value={settings.general.timeZone}
           onChange={(e) => updateSetting('general', 'timeZone', e.target.value)}
           className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
-            theme === 'dark'
+            darkMode
               ? 'bg-gray-700 border-gray-600 text-white'
               : 'bg-white border-gray-300 text-gray-900'
           }`}
@@ -189,7 +189,7 @@ const SystemSettings = () => {
     <div className="space-y-6">
       <div>
         <label className={`block text-sm font-medium ${
-          theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+          darkMode ? 'text-gray-300' : 'text-gray-700'
         }`}>
           Minimum Password Length
         </label>
@@ -200,7 +200,7 @@ const SystemSettings = () => {
           value={settings.security.passwordMinLength}
           onChange={(e) => updateSetting('security', 'passwordMinLength', parseInt(e.target.value))}
           className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
-            theme === 'dark'
+            darkMode
               ? 'bg-gray-700 border-gray-600 text-white'
               : 'bg-white border-gray-300 text-gray-900'
           }`}
@@ -216,7 +216,7 @@ const SystemSettings = () => {
           className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
         />
         <label htmlFor="requireSpecialChar" className={`ml-2 block text-sm ${
-          theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+          darkMode ? 'text-gray-300' : 'text-gray-700'
         }`}>
           Require special characters in passwords
         </label>
@@ -224,7 +224,7 @@ const SystemSettings = () => {
 
       <div>
         <label className={`block text-sm font-medium ${
-          theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+          darkMode ? 'text-gray-300' : 'text-gray-700'
         }`}>
           Session Timeout (minutes)
         </label>
@@ -235,7 +235,7 @@ const SystemSettings = () => {
           value={settings.security.sessionTimeout}
           onChange={(e) => updateSetting('security', 'sessionTimeout', parseInt(e.target.value))}
           className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
-            theme === 'dark'
+            darkMode
               ? 'bg-gray-700 border-gray-600 text-white'
               : 'bg-white border-gray-300 text-gray-900'
           }`}
@@ -244,7 +244,7 @@ const SystemSettings = () => {
 
       <div>
         <label className={`block text-sm font-medium ${
-          theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+          darkMode ? 'text-gray-300' : 'text-gray-700'
         }`}>
           Max Login Attempts
         </label>
@@ -255,7 +255,7 @@ const SystemSettings = () => {
           value={settings.security.maxLoginAttempts}
           onChange={(e) => updateSetting('security', 'maxLoginAttempts', parseInt(e.target.value))}
           className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
-            theme === 'dark'
+            darkMode
               ? 'bg-gray-700 border-gray-600 text-white'
               : 'bg-white border-gray-300 text-gray-900'
           }`}
@@ -271,7 +271,7 @@ const SystemSettings = () => {
           className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
         />
         <label htmlFor="enforceIPWhitelist" className={`ml-2 block text-sm ${
-          theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+          darkMode ? 'text-gray-300' : 'text-gray-700'
         }`}>
           Enforce IP whitelist for admin access
         </label>
@@ -290,7 +290,7 @@ const SystemSettings = () => {
           className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
         />
         <label htmlFor="emailEnabled" className={`ml-2 block text-sm ${
-          theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+          darkMode ? 'text-gray-300' : 'text-gray-700'
         }`}>
           Enable email notifications
         </label>
@@ -299,7 +299,7 @@ const SystemSettings = () => {
       {settings.notifications.emailEnabled && (
         <div>
           <label className={`block text-sm font-medium ${
-            theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+            darkMode ? 'text-gray-300' : 'text-gray-700'
           }`}>
             From Email Address
           </label>
@@ -308,7 +308,7 @@ const SystemSettings = () => {
             value={settings.notifications.emailFrom}
             onChange={(e) => updateSetting('notifications', 'emailFrom', e.target.value)}
             className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
-              theme === 'dark'
+              darkMode
                 ? 'bg-gray-700 border-gray-600 text-white'
                 : 'bg-white border-gray-300 text-gray-900'
             }`}
@@ -325,7 +325,7 @@ const SystemSettings = () => {
           className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
         />
         <label htmlFor="slackEnabled" className={`ml-2 block text-sm ${
-          theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+          darkMode ? 'text-gray-300' : 'text-gray-700'
         }`}>
           Enable Slack notifications
         </label>
@@ -334,7 +334,7 @@ const SystemSettings = () => {
       {settings.notifications.slackEnabled && (
         <div>
           <label className={`block text-sm font-medium ${
-            theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+            darkMode ? 'text-gray-300' : 'text-gray-700'
           }`}>
             Slack Webhook URL
           </label>
@@ -343,7 +343,7 @@ const SystemSettings = () => {
             value={settings.notifications.slackWebhook}
             onChange={(e) => updateSetting('notifications', 'slackWebhook', e.target.value)}
             className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
-              theme === 'dark'
+              darkMode
                 ? 'bg-gray-700 border-gray-600 text-white'
                 : 'bg-white border-gray-300 text-gray-900'
             }`}
@@ -354,7 +354,7 @@ const SystemSettings = () => {
 
       <div className="space-y-2">
         <h4 className={`text-sm font-medium ${
-          theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+          darkMode ? 'text-gray-300' : 'text-gray-700'
         }`}>
           Notification Events
         </h4>
@@ -368,7 +368,7 @@ const SystemSettings = () => {
               className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
             />
             <span className={`ml-2 text-sm ${
-              theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+              darkMode ? 'text-gray-300' : 'text-gray-700'
             }`}>
               New user registration
             </span>
@@ -382,7 +382,7 @@ const SystemSettings = () => {
               className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
             />
             <span className={`ml-2 text-sm ${
-              theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+              darkMode ? 'text-gray-300' : 'text-gray-700'
             }`}>
               Site sync errors
             </span>
@@ -396,7 +396,7 @@ const SystemSettings = () => {
               className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
             />
             <span className={`ml-2 text-sm ${
-              theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+              darkMode ? 'text-gray-300' : 'text-gray-700'
             }`}>
               Low disk space warnings
             </span>
@@ -410,7 +410,7 @@ const SystemSettings = () => {
     <div className="space-y-6">
       <div>
         <label className={`block text-sm font-medium ${
-          theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+          darkMode ? 'text-gray-300' : 'text-gray-700'
         }`}>
           Default CPM Rate ($)
         </label>
@@ -421,7 +421,7 @@ const SystemSettings = () => {
           value={settings.monetization.defaultCPM}
           onChange={(e) => updateSetting('monetization', 'defaultCPM', parseFloat(e.target.value))}
           className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
-            theme === 'dark'
+            darkMode
               ? 'bg-gray-700 border-gray-600 text-white'
               : 'bg-white border-gray-300 text-gray-900'
           }`}
@@ -430,7 +430,7 @@ const SystemSettings = () => {
 
       <div>
         <label className={`block text-sm font-medium ${
-          theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+          darkMode ? 'text-gray-300' : 'text-gray-700'
         }`}>
           Minimum Payout Amount ($)
         </label>
@@ -441,7 +441,7 @@ const SystemSettings = () => {
           value={settings.monetization.minPayout}
           onChange={(e) => updateSetting('monetization', 'minPayout', parseFloat(e.target.value))}
           className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
-            theme === 'dark'
+            darkMode
               ? 'bg-gray-700 border-gray-600 text-white'
               : 'bg-white border-gray-300 text-gray-900'
           }`}
@@ -450,7 +450,7 @@ const SystemSettings = () => {
 
       <div>
         <label className={`block text-sm font-medium ${
-          theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+          darkMode ? 'text-gray-300' : 'text-gray-700'
         }`}>
           Payout Schedule
         </label>
@@ -458,7 +458,7 @@ const SystemSettings = () => {
           value={settings.monetization.payoutSchedule}
           onChange={(e) => updateSetting('monetization', 'payoutSchedule', e.target.value)}
           className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
-            theme === 'dark'
+            darkMode
               ? 'bg-gray-700 border-gray-600 text-white'
               : 'bg-white border-gray-300 text-gray-900'
           }`}
@@ -479,7 +479,7 @@ const SystemSettings = () => {
           className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
         />
         <label htmlFor="autoCalculateRoyalties" className={`ml-2 block text-sm ${
-          theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+          darkMode ? 'text-gray-300' : 'text-gray-700'
         }`}>
           Automatically calculate royalties
         </label>
@@ -487,14 +487,14 @@ const SystemSettings = () => {
 
       <div>
         <h4 className={`text-sm font-medium mb-2 ${
-          theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+          darkMode ? 'text-gray-300' : 'text-gray-700'
         }`}>
           Default Royalty Distribution
         </h4>
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className={`block text-xs ${
-              theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+              darkMode ? 'text-gray-400' : 'text-gray-600'
             }`}>
               Artist Share (%)
             </label>
@@ -517,7 +517,7 @@ const SystemSettings = () => {
                 }));
               }}
               className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
-                theme === 'dark'
+                darkMode
                   ? 'bg-gray-700 border-gray-600 text-white'
                   : 'bg-white border-gray-300 text-gray-900'
               }`}
@@ -525,7 +525,7 @@ const SystemSettings = () => {
           </div>
           <div>
             <label className={`block text-xs ${
-              theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+              darkMode ? 'text-gray-400' : 'text-gray-600'
             }`}>
               Platform Share (%)
             </label>
@@ -536,7 +536,7 @@ const SystemSettings = () => {
               value={settings.monetization.royaltyDistribution.platform}
               disabled
               className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
-                theme === 'dark'
+                darkMode
                   ? 'bg-gray-600 border-gray-500 text-gray-400'
                   : 'bg-gray-100 border-gray-300 text-gray-500'
               }`}
@@ -558,7 +558,7 @@ const SystemSettings = () => {
           className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
         />
         <label htmlFor="autoBackup" className={`ml-2 block text-sm ${
-          theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+          darkMode ? 'text-gray-300' : 'text-gray-700'
         }`}>
           Enable automatic backups
         </label>
@@ -568,7 +568,7 @@ const SystemSettings = () => {
         <>
           <div>
             <label className={`block text-sm font-medium ${
-              theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+              darkMode ? 'text-gray-300' : 'text-gray-700'
             }`}>
               Backup Frequency
             </label>
@@ -576,7 +576,7 @@ const SystemSettings = () => {
               value={settings.dataManagement.backupFrequency}
               onChange={(e) => updateSetting('dataManagement', 'backupFrequency', e.target.value)}
               className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
-                theme === 'dark'
+                darkMode
                   ? 'bg-gray-700 border-gray-600 text-white'
                   : 'bg-white border-gray-300 text-gray-900'
               }`}
@@ -590,7 +590,7 @@ const SystemSettings = () => {
 
           <div>
             <label className={`block text-sm font-medium ${
-              theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+              darkMode ? 'text-gray-300' : 'text-gray-700'
             }`}>
               Backup Retention (days)
             </label>
@@ -601,7 +601,7 @@ const SystemSettings = () => {
               value={settings.dataManagement.backupRetention}
               onChange={(e) => updateSetting('dataManagement', 'backupRetention', parseInt(e.target.value))}
               className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
-                theme === 'dark'
+                darkMode
                   ? 'bg-gray-700 border-gray-600 text-white'
                   : 'bg-white border-gray-300 text-gray-900'
               }`}
@@ -612,7 +612,7 @@ const SystemSettings = () => {
 
       <div>
         <label className={`block text-sm font-medium ${
-          theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+          darkMode ? 'text-gray-300' : 'text-gray-700'
         }`}>
           Data Retention Period (days)
         </label>
@@ -623,7 +623,7 @@ const SystemSettings = () => {
           value={settings.dataManagement.dataRetention}
           onChange={(e) => updateSetting('dataManagement', 'dataRetention', parseInt(e.target.value))}
           className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
-            theme === 'dark'
+            darkMode
               ? 'bg-gray-700 border-gray-600 text-white'
               : 'bg-white border-gray-300 text-gray-900'
           }`}
@@ -639,7 +639,7 @@ const SystemSettings = () => {
           className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
         />
         <label htmlFor="enableArchiving" className={`ml-2 block text-sm ${
-          theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+          darkMode ? 'text-gray-300' : 'text-gray-700'
         }`}>
           Enable data archiving
         </label>
@@ -648,7 +648,7 @@ const SystemSettings = () => {
       {settings.dataManagement.enableArchiving && (
         <div>
           <label className={`block text-sm font-medium ${
-            theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+            darkMode ? 'text-gray-300' : 'text-gray-700'
           }`}>
             Archive After (days)
           </label>
@@ -659,7 +659,7 @@ const SystemSettings = () => {
             value={settings.dataManagement.archiveAfter}
             onChange={(e) => updateSetting('dataManagement', 'archiveAfter', parseInt(e.target.value))}
             className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
-              theme === 'dark'
+              darkMode
                 ? 'bg-gray-700 border-gray-600 text-white'
                 : 'bg-white border-gray-300 text-gray-900'
             }`}
@@ -673,7 +673,7 @@ const SystemSettings = () => {
     <div className="space-y-6">
       <div>
         <label className={`block text-sm font-medium ${
-          theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+          darkMode ? 'text-gray-300' : 'text-gray-700'
         }`}>
           Default Rate Limit (requests/hour)
         </label>
@@ -684,7 +684,7 @@ const SystemSettings = () => {
           value={settings.api.defaultRateLimit}
           onChange={(e) => updateSetting('api', 'defaultRateLimit', parseInt(e.target.value))}
           className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
-            theme === 'dark'
+            darkMode
               ? 'bg-gray-700 border-gray-600 text-white'
               : 'bg-white border-gray-300 text-gray-900'
           }`}
@@ -693,7 +693,7 @@ const SystemSettings = () => {
 
       <div>
         <label className={`block text-sm font-medium ${
-          theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+          darkMode ? 'text-gray-300' : 'text-gray-700'
         }`}>
           Maximum Rate Limit (requests/hour)
         </label>
@@ -704,7 +704,7 @@ const SystemSettings = () => {
           value={settings.api.maxRateLimit}
           onChange={(e) => updateSetting('api', 'maxRateLimit', parseInt(e.target.value))}
           className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
-            theme === 'dark'
+            darkMode
               ? 'bg-gray-700 border-gray-600 text-white'
               : 'bg-white border-gray-300 text-gray-900'
           }`}
@@ -720,7 +720,7 @@ const SystemSettings = () => {
           className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
         />
         <label htmlFor="enablePublicAPI" className={`ml-2 block text-sm ${
-          theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+          darkMode ? 'text-gray-300' : 'text-gray-700'
         }`}>
           Enable public API access
         </label>
@@ -735,7 +735,7 @@ const SystemSettings = () => {
           className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
         />
         <label htmlFor="requireAPIApproval" className={`ml-2 block text-sm ${
-          theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+          darkMode ? 'text-gray-300' : 'text-gray-700'
         }`}>
           Require approval for new API keys
         </label>
@@ -743,7 +743,7 @@ const SystemSettings = () => {
 
       <div>
         <label className={`block text-sm font-medium ${
-          theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+          darkMode ? 'text-gray-300' : 'text-gray-700'
         }`}>
           API Documentation URL
         </label>
@@ -752,7 +752,7 @@ const SystemSettings = () => {
           value={settings.api.apiDocumentationUrl}
           onChange={(e) => updateSetting('api', 'apiDocumentationUrl', e.target.value)}
           className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
-            theme === 'dark'
+            darkMode
               ? 'bg-gray-700 border-gray-600 text-white'
               : 'bg-white border-gray-300 text-gray-900'
           }`}
@@ -785,12 +785,12 @@ const SystemSettings = () => {
       <div className="sm:flex sm:items-center sm:justify-between mb-8">
         <div className="flex-1 min-w-0">
           <h2 className={`text-2xl font-bold leading-7 sm:text-3xl sm:truncate ${
-            theme === 'dark' ? 'text-white' : 'text-gray-900'
+            darkMode ? 'text-white' : 'text-gray-900'
           }`}>
             System Settings
           </h2>
           <p className={`mt-1 text-sm ${
-            theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+            darkMode ? 'text-gray-400' : 'text-gray-500'
           }`}>
             Configure system-wide settings and preferences
           </p>
@@ -810,10 +810,10 @@ const SystemSettings = () => {
                   onClick={() => setActiveTab(tab.id)}
                   className={`w-full group flex items-center px-3 py-2 text-sm font-medium rounded-md ${
                     isActive
-                      ? theme === 'dark'
+                      ? darkMode
                         ? 'bg-gray-700 text-white'
                         : 'bg-gray-100 text-gray-900'
-                      : theme === 'dark'
+                      : darkMode
                         ? 'text-gray-300 hover:bg-gray-700 hover:text-white'
                         : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                   }`}
@@ -821,8 +821,8 @@ const SystemSettings = () => {
                   <Icon
                     className={`flex-shrink-0 -ml-1 mr-3 h-6 w-6 ${
                       isActive
-                        ? theme === 'dark' ? 'text-gray-300' : 'text-gray-500'
-                        : theme === 'dark' ? 'text-gray-400' : 'text-gray-400'
+                        ? darkMode ? 'text-gray-300' : 'text-gray-500'
+                        : darkMode ? 'text-gray-400' : 'text-gray-400'
                     }`}
                   />
                   <span className="truncate">{tab.name}</span>
@@ -835,13 +835,13 @@ const SystemSettings = () => {
         {/* Settings Content */}
         <div className="lg:col-span-3">
           <div className={`shadow sm:rounded-md ${
-            theme === 'dark' ? 'bg-gray-800' : 'bg-white'
+            darkMode ? 'bg-gray-800' : 'bg-white'
           }`}>
             <div className="px-4 py-5 sm:p-6">
               {renderContent()}
             </div>
             <div className={`px-4 py-3 text-right sm:px-6 ${
-              theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'
+              darkMode ? 'bg-gray-900' : 'bg-gray-50'
             }`}>
               <button
                 onClick={handleSave}

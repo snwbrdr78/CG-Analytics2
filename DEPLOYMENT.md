@@ -1,222 +1,353 @@
-# CG Analytics Deployment Guide
-
-This guide covers deployment procedures for both development and production environments based on real-world deployment experience.
+# Comedy Genius Analytics - Deployment Guide
 
 ## Table of Contents
 - [Prerequisites](#prerequisites)
-- [Initial Server Setup](#initial-server-setup)
-- [Development Deployment](#development-deployment)
-- [Production Deployment](#production-deployment)
-- [Common Issues & Solutions](#common-issues--solutions)
-- [Maintenance](#maintenance)
+- [Quick Deploy](#quick-deploy)
+- [Manual Deployment](#manual-deployment)
+- [Production Configuration](#production-configuration)
+- [SSL/HTTPS Setup](#sslhttps-setup)
+- [Database Setup](#database-setup)
+- [Process Management](#process-management)
+- [Nginx Configuration](#nginx-configuration)
+- [Monitoring & Maintenance](#monitoring--maintenance)
+- [Troubleshooting](#troubleshooting)
 
 ## Prerequisites
 
 ### System Requirements
-- **OS**: Amazon Linux 2023 (or Ubuntu 20.04+)
+- **OS**: Ubuntu 20.04+ or Amazon Linux 2
 - **Node.js**: 18.x or higher
-- **PostgreSQL**: 15.x
-- **PM2**: Latest version
-- **Nginx**: 1.28.x
-- **Redis**: (Optional, for queue processing)
+- **PostgreSQL**: 14.x or higher
+- **Redis**: 6.x or higher (for job queues)
+- **PM2**: Latest version (for process management)
+- **Nginx**: Latest stable version (for reverse proxy)
+- **RAM**: Minimum 2GB, recommended 4GB+
+- **Storage**: 20GB+ for application and logs
 
-### Required Packages
+### Required Software Installation
+
 ```bash
-# For Amazon Linux 2023
-sudo dnf update -y
-sudo dnf install -y nodejs npm git nginx postgresql15 postgresql15-server
+# Update system packages
+sudo apt update && sudo apt upgrade -y
+
+# Install Node.js 18.x
+curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+sudo apt install -y nodejs
+
+# Install PostgreSQL
+sudo apt install -y postgresql postgresql-contrib
+
+# Install Redis
+sudo apt install -y redis-server
+
+# Install PM2 globally
 sudo npm install -g pm2
 
-# For Ubuntu
-sudo apt update
-sudo apt install -y nodejs npm git nginx postgresql postgresql-contrib
-sudo npm install -g pm2
+# Install Nginx
+sudo apt install -y nginx
+
+# Install certbot for SSL (optional)
+sudo apt install -y certbot python3-certbot-nginx
 ```
 
-## Initial Server Setup
+## Quick Deploy
 
-### 1. Clone Repository
+Use the automated deployment script for a quick setup:
+
 ```bash
-cd /home/ec2-user  # or your preferred directory
-git clone git@github.com:snwbrdr78/CG-Analytics2.git
-cd CG-Analytics2/cg-analytics-app
+# Clone the repository
+git clone https://github.com/your-org/CG-Analytics2.git
+cd CG-Analytics2
+
+# Make deploy script executable
+chmod +x deploy.sh
+
+# Run deployment
+./deploy.sh
+
+# For production deployment with all options
+./deploy.sh --env production --ssl --backup
 ```
 
-### 2. Install Dependencies
+### Deploy Script Options
+- `--env [development|production]` - Set environment (default: development)
+- `--ssl` - Configure SSL certificates
+- `--backup` - Backup database before deployment
+- `--skip-deps` - Skip dependency installation
+- `--skip-build` - Skip frontend build
+- `--skip-migrate` - Skip database migrations
+- `--help` - Show help message
+
+## Manual Deployment
+
+### 1. Clone and Setup Repository
+
 ```bash
-# Install all dependencies
+# Clone repository
+git clone https://github.com/your-org/CG-Analytics2.git
+cd CG-Analytics2
+
+# Install dependencies
 npm run install:all
-
-# Or separately
-cd backend && npm install
-cd ../frontend && npm install
 ```
 
-### 3. PostgreSQL Setup
-```bash
-# Initialize PostgreSQL (Amazon Linux)
-sudo postgresql-setup --initdb
-sudo systemctl enable postgresql
-sudo systemctl start postgresql
+### 2. Configure Environment
 
-# Create database and user
-sudo -u postgres psql << EOF
-CREATE DATABASE cg_analytics;
-CREATE USER cg_user WITH PASSWORD 'SecurePass123';
-GRANT ALL PRIVILEGES ON DATABASE cg_analytics TO cg_user;
-ALTER DATABASE cg_analytics OWNER TO cg_user;
-\q
-EOF
+```bash
+# Copy environment template
+cp .env.example .env
+
+# Edit configuration
+nano .env
 ```
 
-### 4. Environment Configuration
-Create `.env` file in `backend/` directory:
+Key environment variables:
 ```bash
-cat > backend/.env << 'EOF'
 # Database
-DB_NAME=cg_analytics
-DB_USER=cg_user
-DB_PASSWORD=SecurePass123
 DB_HOST=localhost
 DB_PORT=5432
+DB_NAME=cg_analytics
+DB_USER=your_db_user
+DB_PASSWORD=your_secure_password
 
-# JWT
-JWT_SECRET=cg_analytics_jwt_secret_2025_production_key
+# Authentication
+JWT_SECRET=your-super-secret-jwt-key-change-this
 
-# Redis (optional)
+# Redis
 REDIS_HOST=localhost
 REDIS_PORT=6379
 
 # Server
 PORT=5000
-NODE_ENV=development
-EOF
+NODE_ENV=production
+FRONTEND_URL=https://yourdomain.com
+
+# Admin Account
+ADMIN_EMAIL=admin@comedygenius.tv
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=SecurePassword123!
 ```
 
-### 5. Database Tables Setup
+### 3. Setup Database
+
 ```bash
-cd backend
-# Force sync all models (WARNING: This drops existing tables)
-node -e "const { sequelize } = require('./models'); sequelize.sync({ force: true }).then(() => { console.log('Database synced'); process.exit(0); });"
+# Create PostgreSQL user and database
+sudo -u postgres psql
+
+CREATE USER cg_user WITH PASSWORD 'your_secure_password';
+CREATE DATABASE cg_analytics OWNER cg_user;
+GRANT ALL PRIVILEGES ON DATABASE cg_analytics TO cg_user;
+\q
+
+# Run migrations (automatic on first start)
+cd backend && npm run migrate
 ```
 
-### 6. Create Admin User
-Create `backend/createAdmin.js`:
+### 4. Build Frontend
+
 ```bash
-cat > backend/createAdmin.js << 'EOF'
-const { User } = require('./models');
-
-async function createAdminUser() {
-  try {
-    await User.destroy({ where: { email: 'admin@cg.com' } });
-    
-    const user = await User.create({
-      username: 'cgadmin',
-      email: 'admin@cg.com',
-      password: 'password123',
-      role: 'admin',
-      isActive: true
-    });
-    
-    console.log('Admin user created successfully');
-    console.log('Email: admin@cg.com');
-    console.log('Password: password123');
-    
-    process.exit(0);
-  } catch (error) {
-    console.error('Error creating admin user:', error);
-    process.exit(1);
-  }
-}
-
-createAdminUser();
-EOF
-
-node createAdmin.js
-```
-
-## Development Deployment
-
-### 1. Start Development Servers
-```bash
-# Option 1: Foreground (for debugging)
-npm run dev
-
-# Option 2: Background with PM2
-npm run start:dev-bg
-
-# Option 3: Manual PM2 start
-cd backend
-pm2 start server.js --name "cg-analytics-dev" --watch
-```
-
-### 2. Access Development Server
-- Frontend: http://localhost:5173
-- Backend API: http://localhost:5000
-- Use two terminal windows or PM2 for both services
-
-## Production Deployment
-
-### 1. Build Frontend
-```bash
-cd /home/ec2-user/CG-Analytics2/cg-analytics-app
+# Build production frontend
 npm run build
 ```
 
-### 2. Configure PM2 Ecosystem
-Update `ecosystem.config.js`:
+### 5. Start Services
+
+```bash
+# Start with PM2
+npm run start:bg
+
+# Or start services individually
+pm2 start ecosystem.config.js
+```
+
+## Production Configuration
+
+### PM2 Configuration
+
+The `ecosystem.config.js` file configures PM2 for production:
+
 ```javascript
 module.exports = {
   apps: [
     {
-      name: 'cg-analytics-backend',
+      name: 'cg-backend',
       script: './backend/server.js',
-      cwd: './',
       instances: 1,
-      autorestart: true,
-      watch: false,
+      exec_mode: 'fork',
       max_memory_restart: '1G',
-      env: {
+      env_production: {
         NODE_ENV: 'production',
-        PORT: 5000,
-        // Add all environment variables here
+        PORT: 5000
+      }
+    },
+    {
+      name: 'cg-frontend',
+      script: 'npm',
+      args: 'run preview',
+      cwd: './frontend',
+      env_production: {
+        NODE_ENV: 'production',
+        PORT: 5173
       }
     }
   ]
 };
 ```
 
-### 3. SSL Certificate Setup
+### PM2 Commands
+
 ```bash
-# Create self-signed certificate (for testing)
-sudo mkdir -p /etc/nginx/ssl
-sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-  -keyout /etc/nginx/ssl/key.pem \
-  -out /etc/nginx/ssl/cert.pem \
-  -subj "/C=US/ST=State/L=City/O=Organization/CN=localhost"
+# Start all services
+pm2 start ecosystem.config.js --env production
+
+# Check status
+pm2 status
+
+# View logs
+pm2 logs
+
+# Monitor resources
+pm2 monit
+
+# Save PM2 configuration
+pm2 save
+
+# Setup PM2 startup script
+pm2 startup
+
+# Restart services
+pm2 restart all
+
+# Stop services
+pm2 stop all
 ```
 
-### 4. Nginx Configuration
-Create `/etc/nginx/conf.d/cg-analytics.conf`:
+## SSL/HTTPS Setup
+
+### Using Certbot (Recommended)
+
+```bash
+# Install certbot
+sudo apt install certbot python3-certbot-nginx
+
+# Obtain certificate
+sudo certbot --nginx -d yourdomain.com -d www.yourdomain.com
+
+# Auto-renewal test
+sudo certbot renew --dry-run
+```
+
+### Manual SSL Configuration
+
+1. Place your SSL certificates in `/etc/nginx/ssl/`:
+   - `server.crt` - SSL certificate
+   - `server.key` - Private key
+
+2. Update Nginx configuration (see below)
+
+## Database Setup
+
+### Initial Setup
+
+```bash
+# Create database
+sudo -u postgres createdb cg_analytics
+
+# Create user
+sudo -u postgres createuser -P cg_user
+
+# Grant privileges
+sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE cg_analytics TO cg_user;"
+```
+
+### Backup & Restore
+
+```bash
+# Backup database
+pg_dump -U cg_user -h localhost cg_analytics > backup_$(date +%Y%m%d_%H%M%S).sql
+
+# Restore database
+psql -U cg_user -h localhost cg_analytics < backup_file.sql
+```
+
+### Automated Backups
+
+Add to crontab:
+```bash
+# Daily backup at 2 AM
+0 2 * * * pg_dump -U cg_user -h localhost cg_analytics > /backups/cg_analytics_$(date +\%Y\%m\%d).sql
+```
+
+## Process Management
+
+### Systemd Service (Alternative to PM2)
+
+Create `/etc/systemd/system/cg-analytics.service`:
+
+```ini
+[Unit]
+Description=Comedy Genius Analytics
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/CG-Analytics2
+ExecStart=/usr/bin/npm run start
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Enable and start:
+```bash
+sudo systemctl enable cg-analytics
+sudo systemctl start cg-analytics
+sudo systemctl status cg-analytics
+```
+
+## Nginx Configuration
+
+### Production Nginx Config
+
+Create `/etc/nginx/sites-available/cg-analytics`:
+
 ```nginx
+# HTTP to HTTPS redirect
 server {
     listen 80;
-    listen [::]:80;
-    server_name _;
-    return 301 https://$host$request_uri;
+    server_name yourdomain.com www.yourdomain.com;
+    return 301 https://$server_name$request_uri;
 }
 
+# HTTPS configuration
 server {
-    listen 443 ssl;
-    listen [::]:443 ssl;
-    http2 on;
-    server_name _;
-    
-    ssl_certificate /etc/nginx/ssl/cert.pem;
-    ssl_certificate_key /etc/nginx/ssl/key.pem;
-    
+    listen 443 ssl http2;
+    server_name yourdomain.com www.yourdomain.com;
+
+    # SSL Configuration
+    ssl_certificate /etc/letsencrypt/live/yourdomain.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/yourdomain.com/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers on;
+
+    # Security headers
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "no-referrer-when-downgrade" always;
+    add_header Content-Security-Policy "default-src 'self' http: https: data: blob: 'unsafe-inline'" always;
+
+    # Logging
+    access_log /var/log/nginx/cg-analytics-access.log;
+    error_log /var/log/nginx/cg-analytics-error.log;
+
+    # Frontend
     location / {
-        proxy_pass http://localhost:5000;
+        proxy_pass http://localhost:5173;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
@@ -226,206 +357,200 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
     }
+
+    # Backend API
+    location /api {
+        proxy_pass http://localhost:5000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # Timeouts for large file uploads
+        proxy_connect_timeout 300s;
+        proxy_send_timeout 300s;
+        proxy_read_timeout 300s;
+        client_max_body_size 100M;
+    }
+
+    # WebSocket support
+    location /ws {
+        proxy_pass http://localhost:5000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "Upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+
+    # Static files cache
+    location ~* \.(jpg|jpeg|png|gif|ico|css|js|pdf|txt)$ {
+        expires 30d;
+        add_header Cache-Control "public, immutable";
+    }
 }
 ```
 
-### 5. Update Backend for Production
-Ensure `backend/server.js` serves the frontend:
-```javascript
-// Add after middleware setup
-app.use(express.static(path.join(__dirname, '../frontend/dist')));
-
-// Add before error handling (must be last route)
-app.get('*', (req, res) => {
-  if (!req.path.startsWith('/api/')) {
-    res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
-  } else {
-    res.status(404).json({ error: 'API endpoint not found' });
-  }
-});
-```
-
-### 6. Start Production Services
+Enable site:
 ```bash
-# Start/restart services
-sudo systemctl restart nginx
-pm2 start ecosystem.config.js
-pm2 save
-pm2 startup  # Follow the instructions to enable auto-start
+sudo ln -s /etc/nginx/sites-available/cg-analytics /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl reload nginx
 ```
 
-## Common Issues & Solutions
+## Monitoring & Maintenance
 
-### Issue 1: Database Connection Refused
-**Error**: `ECONNREFUSED 127.0.0.1:5432`
+### Health Checks
+
 ```bash
-# Solution
-sudo systemctl status postgresql
-sudo systemctl start postgresql
-```
+# API health check
+curl http://localhost:5000/health
 
-### Issue 2: Password Authentication Failed
-**Error**: `password authentication failed for user "cg_user"`
-```bash
-# Solution: Remove special characters from password
-# Update .env file and database:
-sudo -u postgres psql
-ALTER USER cg_user WITH PASSWORD 'SecurePass123';
-\q
-```
-
-### Issue 3: Login Redirect Loop
-**Symptoms**: Login page keeps redirecting to itself
-```javascript
-// Solution: Fix API interceptor in frontend/src/utils/api.js
-api.interceptors.response.use(
-  response => response,
-  error => {
-    if (error.response?.status === 401) {
-      const currentPath = window.location.pathname
-      if (currentPath !== '/login' && currentPath !== '/register') {
-        localStorage.removeItem('token')
-        window.location.href = '/login'
-      }
-    }
-    return Promise.reject(error)
-  }
-)
-```
-
-### Issue 4: 502 Gateway Error
-**Symptoms**: Nginx returns 502 error
-```bash
-# Check if backend is running
-pm2 status
-pm2 logs cg-analytics-backend
-
-# Ensure backend listens on all interfaces
-# In server.js: app.listen(PORT, '0.0.0.0', ...)
-```
-
-### Issue 5: Assets Not Loading
-**Symptoms**: JavaScript/CSS files return 404
-```bash
-# Ensure frontend is built
-npm run build
-
-# Check static file serving in backend
-# Verify express.static middleware is configured
-```
-
-## Network Access Configuration
-
-### AWS EC2 Security Group
-Add inbound rules:
-- **HTTP**: Port 80, Source: 0.0.0.0/0 (or specific IPs)
-- **HTTPS**: Port 443, Source: 0.0.0.0/0 (or specific IPs)
-
-### Check Network Status
-```bash
-# Create check script
-./check-network-access.sh
-```
-
-## Maintenance
-
-### Regular Tasks
-```bash
-# View logs
-pm2 logs cg-analytics-backend
-
-# Monitor processes
-pm2 monit
-
-# Restart services
-pm2 restart cg-analytics-backend
-
-# Database backup
-pg_dump -U cg_user cg_analytics > backup_$(date +%Y%m%d).sql
-
-# Update dependencies (careful in production)
-cd backend && npm update
-cd ../frontend && npm update
-```
-
-### Updating Application
-```bash
-# Pull latest changes
-git pull origin main
-
-# Install new dependencies
-npm run install:all
-
-# Build frontend
-npm run build
-
-# Run migrations if any
-cd backend && npx sequelize-cli db:migrate
-
-# Restart services
-pm2 restart cg-analytics-backend
-```
-
-### Monitoring
-```bash
-# Check process status
-pm2 status
-
-# View real-time logs
-pm2 logs --lines 100
+# Check application logs
+pm2 logs
 
 # Check system resources
 pm2 monit
 
-# Nginx access logs
-sudo tail -f /var/log/nginx/access.log
+# Database connections
+sudo -u postgres psql -c "SELECT count(*) FROM pg_stat_activity WHERE datname = 'cg_analytics';"
 ```
 
-## Security Recommendations
+### Log Rotation
 
-1. **Use Environment Variables**: Never commit secrets to git
-2. **Update Dependencies**: Regularly update npm packages
-3. **Use HTTPS**: Always use SSL in production
-4. **Firewall Rules**: Restrict access to necessary ports only
-5. **Database Security**: Use strong passwords, limit connections
-6. **Monitoring**: Set up alerts for errors and downtime
-7. **Backups**: Regular automated backups of database
-8. **Rate Limiting**: Implement API rate limiting
-9. **CORS**: Configure CORS properly for production
-10. **Logging**: Centralize logs for easier debugging
+Create `/etc/logrotate.d/cg-analytics`:
 
-## Quick Commands Reference
+```
+/home/ubuntu/CG-Analytics2/logs/*.log {
+    daily
+    rotate 14
+    compress
+    delaycompress
+    notifempty
+    create 0640 ubuntu ubuntu
+    sharedscripts
+    postrotate
+        pm2 reloadLogs
+    endscript
+}
+```
+
+### Monitoring Script
+
+Create `monitor.sh`:
 
 ```bash
-# Start production
-pm2 start ecosystem.config.js
+#!/bin/bash
 
-# Stop all
-pm2 stop all
+# Check if services are running
+if ! pm2 status | grep -q "online"; then
+    echo "Services down! Restarting..."
+    pm2 restart all
+    echo "Restart attempted at $(date)" >> /var/log/cg-analytics-monitor.log
+fi
 
-# View logs
-pm2 logs
+# Check disk space
+DISK_USAGE=$(df -h / | awk 'NR==2 {print $5}' | sed 's/%//')
+if [ $DISK_USAGE -gt 80 ]; then
+    echo "Disk usage critical: ${DISK_USAGE}%" | mail -s "CG Analytics Disk Alert" admin@comedygenius.tv
+fi
 
-# Restart with new code
-git pull && npm run build && pm2 restart cg-analytics-backend
-
-# Database console
-sudo -u postgres psql -d cg_analytics
-
-# Check ports
-ss -tlnp | grep -E ':(80|443|5000)'
-
-# Test endpoints
-curl -k https://localhost/health
-curl -k https://localhost/api/debug
+# Check database connection
+if ! PGPASSWORD=$DB_PASSWORD psql -U $DB_USER -h localhost -d $DB_NAME -c "SELECT 1" > /dev/null 2>&1; then
+    echo "Database connection failed at $(date)" >> /var/log/cg-analytics-monitor.log
+fi
 ```
+
+Add to crontab:
+```bash
+*/5 * * * * /home/ubuntu/CG-Analytics2/monitor.sh
+```
+
+## Troubleshooting
+
+### Common Issues
+
+#### 1. **502 Bad Gateway**
+- Check if backend is running: `pm2 status`
+- Check backend logs: `pm2 logs cg-backend`
+- Verify port 5000 is not blocked: `sudo netstat -tlnp | grep 5000`
+
+#### 2. **Database Connection Failed**
+- Verify PostgreSQL is running: `sudo systemctl status postgresql`
+- Check credentials in `.env`
+- Test connection: `psql -U cg_user -h localhost -d cg_analytics`
+
+#### 3. **Frontend Not Loading**
+- Check frontend process: `pm2 logs cg-frontend`
+- Verify build completed: `ls frontend/dist`
+- Check Nginx error logs: `sudo tail -f /var/log/nginx/error.log`
+
+#### 4. **File Upload Failures**
+- Check file size limits in Nginx config
+- Verify upload directory permissions: `ls -la uploads/`
+- Check available disk space: `df -h`
+
+#### 5. **High Memory Usage**
+- Check PM2 memory limits in `ecosystem.config.js`
+- Monitor with: `pm2 monit`
+- Restart with: `pm2 restart all`
+
+### Debug Mode
+
+Enable debug logging:
+```bash
+# In .env
+LOG_LEVEL=debug
+DEBUG=true
+
+# Restart services
+pm2 restart all
+```
+
+### Performance Tuning
+
+1. **Database Optimization**
+   ```sql
+   -- Add indexes for common queries
+   CREATE INDEX idx_posts_status ON "Posts"(status);
+   CREATE INDEX idx_posts_artist ON "Posts"("artistId");
+   CREATE INDEX idx_snapshots_date ON "Snapshots"("snapshotDate");
+   ```
+
+2. **Redis Configuration**
+   ```bash
+   # Edit /etc/redis/redis.conf
+   maxmemory 1gb
+   maxmemory-policy allkeys-lru
+   ```
+
+3. **Node.js Memory**
+   ```bash
+   # In ecosystem.config.js
+   max_memory_restart: '2G',
+   node_args: '--max-old-space-size=2048'
+   ```
+
+## Security Checklist
+
+- [ ] Change default passwords
+- [ ] Configure firewall (ufw/iptables)
+- [ ] Enable SSL/HTTPS
+- [ ] Set secure headers in Nginx
+- [ ] Regular security updates
+- [ ] Database backups configured
+- [ ] Log monitoring enabled
+- [ ] Rate limiting configured
+- [ ] File upload restrictions
+- [ ] Environment variables secured
 
 ## Support
 
-For issues, check:
-1. PM2 logs: `pm2 logs cg-analytics-backend`
-2. Nginx logs: `/var/log/nginx/error.log`
-3. Browser console for frontend errors
-4. Network tab for API failures
-
-Remember to always test in development before deploying to production!
+For issues or questions:
+- Check logs: `pm2 logs`
+- Review documentation: `/docs`
+- GitHub Issues: [https://github.com/your-org/CG-Analytics2/issues](https://github.com/your-org/CG-Analytics2/issues)

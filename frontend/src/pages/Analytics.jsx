@@ -3,8 +3,11 @@ import { useQuery } from 'react-query'
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid'
 import api from '../utils/api'
+import { usePageTitle } from '../hooks/usePageTitle'
+import { formatCurrency, formatViews, formatCompactNumber } from '../utils/formatters'
 
 export default function Analytics() {
+  usePageTitle('Analytics')
   const [period, setPeriod] = useState('month')
 
   const { data: topPosts } = useQuery(
@@ -38,8 +41,8 @@ export default function Analytics() {
   )
 
   const formatCPM = (earnings, views) => {
-    if (!views || views === 0) return '$0.00'
-    return `$${((earnings / views) * 1000).toFixed(2)}`
+    if (!views || views === 0) return formatCurrency(0)
+    return formatCurrency((earnings / views) * 1000)
   }
 
   return (
@@ -69,7 +72,18 @@ export default function Analytics() {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="period" />
               <YAxis />
-              <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
+              <Tooltip 
+                formatter={(value, name) => [
+                  name === 'Views' ? formatCompactNumber(value) : formatCurrency(value),
+                  name
+                ]}
+                contentStyle={{
+                  backgroundColor: 'rgba(31, 41, 55, 0.95)',
+                  border: 'none',
+                  borderRadius: '0.375rem',
+                  color: '#f3f4f6'
+                }}
+              />
               <Line type="monotone" dataKey="totalEarnings" stroke="#4F46E5" name="Earnings" />
               <Line type="monotone" dataKey="totalViews" stroke="#10B981" name="Views" yAxisId="right" />
               <YAxis yAxisId="right" orientation="right" />
@@ -93,7 +107,7 @@ export default function Analytics() {
               {topPosts && topPosts.length > 0 ? (
                 <ul className="-my-5 divide-y divide-gray-200 dark:divide-gray-700">
                   {topPosts.map((item, idx) => (
-                    <li key={`${item.post.postId}-${idx}`} className="py-4">
+                    <li key={`${item.post.postId}-${idx}`} className="py-4 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors rounded-md px-2 -mx-2">
                       <div className="flex items-center space-x-4">
                         <div className="flex-shrink-0">
                           <span className="inline-flex items-center justify-center h-8 w-8 rounded-full bg-indigo-500">
@@ -111,11 +125,11 @@ export default function Analytics() {
                           </p>
                         </div>
                         <div className="text-right">
-                          <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                            ${item.metrics.earnings ? Number(item.metrics.earnings).toFixed(2) : '0.00'}
+                          <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                            {formatCurrency(item.metrics.earnings || 0)}
                           </p>
                           <p className="text-sm text-gray-500 dark:text-gray-400">
-                            {item.metrics.views?.toLocaleString() || '0'} views
+                            {formatViews(item.metrics.views || 0)} views
                           </p>
                         </div>
                       </div>
@@ -141,7 +155,7 @@ export default function Analytics() {
               {underperforming && underperforming.length > 0 ? (
                 <ul className="-my-5 divide-y divide-gray-200 dark:divide-gray-700">
                   {underperforming.slice(0, 5).map((post, index) => (
-                    <li key={`${post.postId}-underperform-${index}`} className="py-4">
+                    <li key={`${post.postId}-underperform-${index}`} className="py-4 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors rounded-md px-2 -mx-2">
                       <div className="flex items-center space-x-4">
                         <div className="flex-shrink-0">
                           <ArrowDownIcon className="h-5 w-5 text-red-500" />
@@ -151,15 +165,15 @@ export default function Analytics() {
                             {post.title || 'Untitled'}
                           </p>
                           <p className="text-sm text-gray-500 dark:text-gray-400">
-                            {post.lifetimeQualifiedViews?.toLocaleString() || '0'} views
+                            {formatViews(post.lifetimeQualifiedViews || 0)} views
                           </p>
                         </div>
                         <div className="text-right">
-                          <p className="text-sm font-medium text-red-600 dark:text-red-400">
+                          <p className="text-sm font-semibold text-red-600 dark:text-red-400">
                             {formatCPM(post.lifetimeEarnings, post.lifetimeQualifiedViews)}
                           </p>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">
-                            per 1k views
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                            CPM
                           </p>
                         </div>
                       </div>
@@ -188,7 +202,15 @@ export default function Analytics() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="period" />
                 <YAxis />
-                <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
+                <Tooltip 
+                  formatter={(value) => formatCurrency(value)}
+                  contentStyle={{
+                    backgroundColor: 'rgba(31, 41, 55, 0.95)',
+                    border: 'none',
+                    borderRadius: '0.375rem',
+                    color: '#f3f4f6'
+                  }}
+                />
                 {Object.keys(timeline[0]?.byArtist || {}).map((artist, idx) => (
                   <Bar 
                     key={artist}

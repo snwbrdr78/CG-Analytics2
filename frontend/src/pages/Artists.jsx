@@ -3,8 +3,11 @@ import { useQuery, useMutation, useQueryClient } from 'react-query'
 import { PlusIcon, PencilIcon } from '@heroicons/react/24/outline'
 import { toast } from 'react-hot-toast'
 import api from '../utils/api'
+import { usePageTitle } from '../hooks/usePageTitle'
+import { formatPercentage } from '../utils/formatters'
 
 export default function Artists() {
+  usePageTitle('Artists')
   const queryClient = useQueryClient()
   const [showForm, setShowForm] = useState(false)
   const [editingArtist, setEditingArtist] = useState(null)
@@ -191,7 +194,7 @@ export default function Artists() {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Email
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Royalty Rate
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -204,15 +207,15 @@ export default function Artists() {
                 </thead>
                 <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                   {artists?.map((artist) => (
-                    <tr key={artist.id}>
+                    <tr key={artist.id} className="hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
                         {artist.name}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                         {artist.email || '-'}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                        {artist.royaltyRate}%
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100 text-center">
+                        {formatPercentage(artist.royaltyRate)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${

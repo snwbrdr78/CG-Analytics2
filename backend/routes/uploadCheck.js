@@ -3,7 +3,7 @@ const router = express.Router();
 const crypto = require('crypto');
 const { Snapshot, Post, sequelize } = require('../models');
 const { Op } = require('sequelize');
-const FacebookCSVParser = require('../utils/csvParser');
+const FacebookCSVParser = require('../utils/facebookCSVParser');
 const fs = require('fs').promises;
 
 const parser = new FacebookCSVParser();
