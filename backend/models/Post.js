@@ -63,6 +63,20 @@ const Post = sequelize.define('Post', {
     type: DataTypes.STRING,
     allowNull: true,
     comment: 'For reels, links to source video asset tag'
+  },
+  parentPostId: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    comment: 'Reference to parent video post for reels',
+    references: {
+      model: 'Posts',
+      key: 'postId'
+    }
+  },
+  inheritMetadata: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: true,
+    comment: 'Whether reel inherits metadata from parent video'
   }
 }, {
   timestamps: true,
@@ -78,6 +92,9 @@ const Post = sequelize.define('Post', {
     },
     {
       fields: ['artistId']
+    },
+    {
+      fields: ['parentPostId']
     }
   ]
 });

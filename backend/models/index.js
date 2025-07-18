@@ -25,6 +25,10 @@ Delta.belongsTo(Artist, { foreignKey: 'artistId' });
 Post.hasMany(ReelLink, { foreignKey: 'reelPostId' });
 ReelLink.belongsTo(Post, { foreignKey: 'reelPostId' });
 
+// Parent-child relationship for videos and reels
+Post.hasMany(Post, { as: 'childReels', foreignKey: 'parentPostId' });
+Post.belongsTo(Post, { as: 'parentVideo', foreignKey: 'parentPostId' });
+
 // User associations
 User.hasMany(ApiKey, { foreignKey: 'userId' });
 ApiKey.belongsTo(User, { foreignKey: 'userId' });

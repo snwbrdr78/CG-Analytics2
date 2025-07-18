@@ -106,10 +106,10 @@ router.patch('/:postId/status', async (req, res) => {
     });
 
     // Get associated reels if this is a video being removed
-    if (status === 'removed' && post.assetTag) {
+    if (status === 'removed' && ['Video', 'Videos'].includes(post.postType)) {
       const associatedReels = await Post.findAll({
         where: {
-          sourceAssetTag: post.assetTag,
+          parentPostId: req.params.postId,
           status: 'live'
         }
       });

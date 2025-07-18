@@ -7,11 +7,13 @@ require('dotenv').config();
 const { sequelize } = require('./models');
 const authRoutes = require('./routes/auth');
 const uploadRoutes = require('./routes/upload');
+const uploadCheckRoutes = require('./routes/upload-check');
 const artistRoutes = require('./routes/artists');
 const postRoutes = require('./routes/posts');
 const analyticsRoutes = require('./routes/analytics');
 const reportsRoutes = require('./routes/reports');
 const adminRoutes = require('./routes/admin');
+const videoReelsRoutes = require('./routes/video-reels');
 const { authenticateToken } = require('./middleware/auth');
 
 const app = express();
@@ -71,11 +73,13 @@ app.use('/api/auth', authRoutes);
 
 // Protected routes - require authentication
 app.use('/api/upload', authenticateToken, upload.single('file'), uploadRoutes);
+app.use('/api/upload-check', authenticateToken, upload.single('file'), uploadCheckRoutes);
 app.use('/api/artists', authenticateToken, artistRoutes);
 app.use('/api/posts', authenticateToken, postRoutes);
 app.use('/api/analytics', authenticateToken, analyticsRoutes);
 app.use('/api/reports', authenticateToken, reportsRoutes);
 app.use('/api/admin', authenticateToken, adminRoutes);
+app.use('/api/video-reels', authenticateToken, videoReelsRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

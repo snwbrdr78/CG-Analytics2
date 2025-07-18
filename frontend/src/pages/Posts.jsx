@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { useQuery } from 'react-query'
 import { format } from 'date-fns'
-import { MagnifyingGlassIcon, FilmIcon, PhotoIcon, PencilIcon, ChevronUpIcon, ChevronDownIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline'
+import { MagnifyingGlassIcon, FilmIcon, PhotoIcon, PencilIcon, ChevronUpIcon, ChevronDownIcon, ArrowTopRightOnSquareIcon, LinkIcon } from '@heroicons/react/24/outline'
 import api from '../utils/api'
 import EditPostModal from '../components/EditPostModal'
+import LinkToVideoModal from '../components/LinkToVideoModal'
+import ViewLinkedReelsModal from '../components/ViewLinkedReelsModal'
 
 export default function Posts() {
   const [filters, setFilters] = useState({
@@ -14,6 +16,10 @@ export default function Posts() {
   const [page, setPage] = useState(0)
   const [selectedPost, setSelectedPost] = useState(null)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [isLinkToVideoModalOpen, setIsLinkToVideoModalOpen] = useState(false)
+  const [isViewReelsModalOpen, setIsViewReelsModalOpen] = useState(false)
+  const [selectedReel, setSelectedReel] = useState(null)
+  const [selectedVideo, setSelectedVideo] = useState(null)
   const [sortConfig, setSortConfig] = useState({
     key: null,
     direction: 'asc'
@@ -360,15 +366,42 @@ export default function Posts() {
                           )}
                         </td>
                         <td className="w-1/12 px-3 py-4 text-center text-sm font-medium">
-                          <button
-                            onClick={() => {
-                              setSelectedPost(post)
-                              setIsEditModalOpen(true)
-                            }}
-                            className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300"
-                          >
-                            <PencilIcon className="h-5 w-5" />
-                          </button>
+                          <div className="flex items-center justify-center space-x-2">
+                            {post.postType === 'Reel' && (
+                              <button
+                                onClick={() => {
+                                  setSelectedReel(post)
+                                  setIsLinkToVideoModalOpen(true)
+                                }}
+                                className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                                title="Link to Video"
+                              >
+                                <LinkIcon className="h-5 w-5" />
+                              </button>
+                            )}
+                            {['Video', 'Videos'].includes(post.postType) && (
+                              <button
+                                onClick={() => {
+                                  setSelectedVideo(post)
+                                  setIsViewReelsModalOpen(true)
+                                }}
+                                className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300"
+                                title="View Linked Reels"
+                              >
+                                <FilmIcon className="h-5 w-5" />
+                              </button>
+                            )}
+                            <button
+                              onClick={() => {
+                                setSelectedPost(post)
+                                setIsEditModalOpen(true)
+                              }}
+                              className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300"
+                              title="Edit Post"
+                            >
+                              <PencilIcon className="h-5 w-5" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     )
@@ -411,6 +444,28 @@ export default function Posts() {
         onClose={() => {
           setSelectedPost(null)
           setIsEditModalOpen(false)
+        }}
+      />
+      
+      <LinkToVideoModal
+        reel={selectedReel}
+        isOpen={isLinkToVideoModalOpen}
+        onClose={() => {
+          setSelectedReel(null)
+          setIsLinkToVideoModalOpen(false)
+        }}
+        onSuccess={() => {
+          // Refresh posts data
+          window.location.reload()
+        }}
+      />
+      
+      <ViewLinkedReelsModal
+        video={selectedVideo}
+        isOpen={isViewReelsModalOpen}
+        onClose={() => {
+          setSelectedVideo(null)
+          setIsViewReelsModalOpen(false)
         }}
       />
     </div>

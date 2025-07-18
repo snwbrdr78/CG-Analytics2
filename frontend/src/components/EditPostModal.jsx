@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
-import { XMarkIcon } from '@heroicons/react/24/outline'
+import { XMarkIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline'
 import { useMutation, useQuery, useQueryClient } from 'react-query'
+import { toast } from 'react-hot-toast'
 import api from '../utils/api'
 
 export default function EditPostModal({ post, isOpen, onClose }) {
@@ -10,6 +11,9 @@ export default function EditPostModal({ post, isOpen, onClose }) {
     description: '',
     artistId: ''
   })
+  const [showRemoveConfirm, setShowRemoveConfirm] = useState(false)
+  const [childReels, setChildReels] = useState([])
+  const [checkingChildren, setCheckingChildren] = useState(false)
 
   // Fetch artists for dropdown
   const { data: artists } = useQuery('artists', 
@@ -21,6 +25,22 @@ export default function EditPostModal({ post, isOpen, onClose }) {
     (data) => api.put(`/posts/${post.postId}`, data),
     {
       onSuccess: () => {
+        queryClient.invalidateQueries('posts')
+        onClose()
+      }
+    }
+  )
+
+  // Remove post mutation
+  const removePost = useMutation(
+    () => api.patch(`/posts/${post.postId}/status`, { status: 'removed' }),
+    {
+      onSuccess: (response) => {
+        if (response.data.warning) {
+          toast.warning(response.data.warning)
+        } else {
+          toast.success('Post marked as removed')
+        }
         queryClient.invalidateQueries('posts')
         onClose()
       }
@@ -40,6 +60,41 @@ export default function EditPostModal({ post, isOpen, onClose }) {
   const handleSubmit = (e) => {
     e.preventDefault()
     updatePost.mutate(formData)
+  }
+
+  const checkForChildren = async () => {
+    if (!['Video', 'Videos'].includes(post?.postType)) {
+      // Not a video, proceed with removal
+      removePost.mutate()
+      return
+    }
+
+    setCheckingChildren(true)
+    try {
+      const response = await api.get(`/video-reels/video/${post.postId}/check-children`)
+      const { hasChildren, children } = response.data
+      
+      if (hasChildren) {
+        setChildReels(children)
+        setShowRemoveConfirm(true)
+      } else {
+        // No children, proceed with removal
+        removePost.mutate()
+      }
+    } catch (error) {
+      toast.error('Failed to check for child reels')
+    } finally {
+      setCheckingChildren(false)
+    }
+  }
+
+  const handleRemove = () => {
+    checkForChildren()
+  }
+
+  const confirmRemove = () => {
+    removePost.mutate()
+    setShowRemoveConfirm(false)
   }
 
   if (!isOpen) return null
@@ -136,23 +191,78 @@ export default function EditPostModal({ post, isOpen, onClose }) {
             />
           </div>
 
-          <div className="flex justify-end space-x-3 pt-4">
+          <div className="flex justify-between pt-4">
             <button
               type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600"
+              onClick={handleRemove}
+              disabled={checkingChildren || removePost.isLoading || post?.status === 'removed'}
+              className="px-4 py-2 text-sm font-medium text-white bg-red-600 dark:bg-red-500 border border-transparent rounded-md hover:bg-red-700 dark:hover:bg-red-600 disabled:opacity-50"
             >
-              Cancel
+              {checkingChildren ? 'Checking...' : post?.status === 'removed' ? 'Already Removed' : 'Mark as Removed'}
             </button>
-            <button
-              type="submit"
-              disabled={updatePost.isLoading}
-              className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 dark:bg-indigo-500 border border-transparent rounded-md hover:bg-indigo-700 dark:hover:bg-indigo-600 disabled:opacity-50"
-            >
-              {updatePost.isLoading ? 'Saving...' : 'Save Changes'}
-            </button>
+            <div className="flex space-x-3">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={updatePost.isLoading}
+                className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 dark:bg-indigo-500 border border-transparent rounded-md hover:bg-indigo-700 dark:hover:bg-indigo-600 disabled:opacity-50"
+              >
+                {updatePost.isLoading ? 'Saving...' : 'Save Changes'}
+              </button>
+            </div>
           </div>
         </form>
+
+        {/* Remove Confirmation Dialog */}
+        {showRemoveConfirm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[60]">
+            <div className="bg-white dark:bg-gray-800 rounded-lg max-w-md w-full p-6">
+              <div className="flex items-center mb-4">
+                <ExclamationTriangleIcon className="h-6 w-6 text-yellow-500 mr-2" />
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                  Warning: Video has linked reels
+                </h3>
+              </div>
+              
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                This video has {childReels.length} linked reel{childReels.length !== 1 ? 's' : ''} that are still live:
+              </p>
+              
+              <div className="max-h-32 overflow-y-auto mb-4 space-y-1">
+                {childReels.map(reel => (
+                  <div key={reel.postId} className="text-sm text-gray-700 dark:text-gray-300">
+                    • {reel.title || 'Untitled Reel'}
+                  </div>
+                ))}
+              </div>
+              
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                Removing this video will not affect the reels, but they will lose their parent association.
+              </p>
+              
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => setShowRemoveConfirm(false)}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmRemove}
+                  className="px-4 py-2 text-sm font-medium text-white bg-red-600 dark:bg-red-500 border border-transparent rounded-md hover:bg-red-700 dark:hover:bg-red-600"
+                >
+                  Remove Anyway
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

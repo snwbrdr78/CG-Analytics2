@@ -128,12 +128,39 @@ class FacebookCSVParser {
   }
 
   getEarnings(row, transformed) {
-    // Use approximate earnings for posts after April 2025
-    if (transformed.publishTime && dayjs(transformed.publishTime).isAfter('2025-04-01')) {
-      return transformed.approximateEarnings || 0;
+    let totalEarnings = 0;
+    
+    // Known earnings columns
+    const knownEarningsColumns = [
+      'estimatedEarnings',
+      'approximateEarnings'
+    ];
+    
+    // Add up all known earnings columns
+    knownEarningsColumns.forEach(col => {
+      if (transformed[col] && !isNaN(transformed[col])) {
+        totalEarnings += parseFloat(transformed[col]);
+      }
+    });
+    
+    // If no earnings found in known columns, search for other potential earnings columns
+    if (totalEarnings === 0) {
+      // Look for any column containing "earning" or "revenue" or "monetization"
+      for (const [key, value] of Object.entries(row)) {
+        const lowerKey = key.toLowerCase();
+        if ((lowerKey.includes('earning') || 
+             lowerKey.includes('revenue') || 
+             lowerKey.includes('monetization')) &&
+            !lowerKey.includes('estimated') &&
+            !lowerKey.includes('approximate') &&
+            value && !isNaN(value)) {
+          console.log(`Found potential earnings column: "${key}" with value: ${value}`);
+          totalEarnings += parseFloat(String(value).replace(/[$,]/g, ''));
+        }
+      }
     }
-    // Use estimated earnings for older posts
-    return transformed.estimatedEarnings || transformed.approximateEarnings || 0;
+    
+    return totalEarnings;
   }
 
   normalizePostType(type) {
@@ -160,6 +187,32 @@ class FacebookCSVParser {
   async processFile(filePath) {
     try {
       const rawData = await this.parseFile(filePath);
+      
+      // Log column headers from first row
+      if (rawData.length > 0) {
+        const headers = Object.keys(rawData[0]);
+        console.log('\n📊 CSV Column Analysis:');
+        console.log('Total columns:', headers.length);
+        
+        // Check for earnings columns
+        const earningsColumns = headers.filter(h => 
+          h.toLowerCase().includes('earning') || 
+          h.toLowerCase().includes('revenue') ||
+          h.toLowerCase().includes('monetization')
+        );
+        
+        if (earningsColumns.length > 0) {
+          console.log('Earnings columns found:', earningsColumns);
+          
+          // Sample values from first row
+          earningsColumns.forEach(col => {
+            console.log(`  ${col}: ${rawData[0][col]}`);
+          });
+        } else {
+          console.log('⚠️  No standard earnings columns found');
+        }
+      }
+      
       const transformed = rawData.map(row => this.transformRow(row));
       
       // Group by post for lifetime aggregation

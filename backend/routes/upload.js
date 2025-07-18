@@ -15,13 +15,27 @@ router.post('/', async (req, res) => {
 
     const filePath = req.file.path;
     
+    // Use provided snapshot date or fall back to file modification time
+    let snapshotDate;
+    if (req.body.snapshotDate) {
+      snapshotDate = new Date(req.body.snapshotDate);
+      // Set time to end of day to ensure we capture all data for that date
+      snapshotDate.setHours(23, 59, 59, 999);
+    } else {
+      // Fallback to file modification time
+      const fileStats = await fs.stat(filePath);
+      snapshotDate = fileStats.mtime;
+    }
+    
+    console.log(`Processing CSV with snapshot date: ${snapshotDate.toISOString()}`);
+    
     // Parse the CSV file
     const parsedData = await parser.processFile(filePath);
     
     // Process snapshots and calculate deltas
     const results = await snapshotService.processSnapshot(
       parsedData, 
-      new Date()
+      snapshotDate
     );
     
     // Clean up uploaded file
@@ -32,7 +46,10 @@ router.post('/', async (req, res) => {
       message: 'File processed successfully',
       results: {
         ...results,
-        metadata: parsedData.metadata
+        metadata: {
+          ...parsedData.metadata,
+          snapshotDate: snapshotDate.toISOString()
+        }
       }
     });
   } catch (error) {
