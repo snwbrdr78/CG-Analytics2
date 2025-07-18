@@ -21,7 +21,7 @@ const Post = sequelize.define('Post', {
     allowNull: true
   },
   postType: {
-    type: DataTypes.ENUM('Video', 'Videos', 'Reel', 'Photo', 'Text', 'Link', 'Status'),
+    type: DataTypes.ENUM('Video', 'Videos', 'Reel', 'Photo', 'Text', 'Link', 'Links', 'Status'),
     allowNull: false
   },
   publishTime: {
