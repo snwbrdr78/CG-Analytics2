@@ -4,17 +4,17 @@ const dayjs = require('dayjs');
 
 class SnapshotService {
   async processSnapshot(parsedData, uploadDate) {
-    const transaction = await sequelize.transaction();
-    
-    try {
-      const results = {
-        created: { posts: 0, snapshots: 0 },
-        updated: { posts: 0, snapshots: 0 },
-        errors: []
-      };
+    const results = {
+      created: { posts: 0, snapshots: 0 },
+      updated: { posts: 0, snapshots: 0 },
+      errors: []
+    };
 
-      for (const [postId, postData] of Object.entries(parsedData.aggregated)) {
-        try {
+    for (const [postId, postData] of Object.entries(parsedData.aggregated)) {
+      // Use individual transactions for each post to prevent cascading failures
+      const transaction = await sequelize.transaction();
+      
+      try {
           // Create or update post
           const [post, created] = await Post.findOrCreate({
             where: { postId },
@@ -82,24 +82,23 @@ class SnapshotService {
               results.updated.snapshots++;
             }
           }
+
+          await transaction.commit();
         } catch (error) {
+          await transaction.rollback();
+          console.error(`Error processing post ${postId}:`, error.message);
           results.errors.push({
             postId,
             error: error.message
           });
+          // Continue processing other posts instead of failing
         }
       }
-
-      await transaction.commit();
       
       // Calculate deltas after successful import
       await this.calculateDeltas(uploadDate);
       
       return results;
-    } catch (error) {
-      await transaction.rollback();
-      throw error;
-    }
   }
 
   async calculateDeltas(currentDate) {
