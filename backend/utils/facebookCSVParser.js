@@ -28,7 +28,8 @@ class FacebookCSVParser {
       'Approximate content monetization earnings': 'approximateEarnings',
       'Qualified Views': 'qualifiedViews',
       '3-Second Video Views': 'threeSecondViews',
-      '1-Minute Video Views': 'oneMinuteViews'
+      '1-Minute Video Views': 'oneMinuteViews',
+      'Views': 'views'
     };
   }
 
@@ -96,6 +97,13 @@ class FacebookCSVParser {
     // Normalize post type
     if (transformed.postType) {
       transformed.postType = this.normalizePostType(transformed.postType);
+    }
+
+    // Handle views data - only for videos and reels
+    if (transformed.postType === 'Video' || transformed.postType === 'Reel') {
+      const viewsResult = this.getViewsData(row, transformed);
+      transformed.views = viewsResult.views;
+      transformed.viewsSource = viewsResult.source;
     }
 
     // Extract quarter from date range if available
@@ -171,6 +179,30 @@ class FacebookCSVParser {
     return type;
   }
 
+  getViewsData(row, transformed) {
+    // Check if we have a direct "Views" column
+    if (transformed.views !== undefined && transformed.views !== null) {
+      return {
+        views: transformed.views,
+        source: 'views'
+      };
+    }
+    
+    // Fallback to 1-minute video views
+    if (transformed.oneMinuteViews !== undefined && transformed.oneMinuteViews !== null) {
+      return {
+        views: transformed.oneMinuteViews,
+        source: '1-minute'
+      };
+    }
+    
+    // No views data available
+    return {
+      views: 0,
+      source: 'none'
+    };
+  }
+
   extractQuarter(row) {
     // Try to extract from filename or date range columns
     const dateStr = row['Date'] || '';
@@ -210,6 +242,25 @@ class FacebookCSVParser {
           });
         } else {
           console.log('⚠️  No standard earnings columns found');
+        }
+        
+        // Check for views columns
+        const viewsColumns = headers.filter(h => 
+          h === 'Views' || 
+          h === '1-Minute Video Views' ||
+          h.toLowerCase().includes('view')
+        );
+        
+        if (viewsColumns.length > 0) {
+          console.log('\nViews columns found:', viewsColumns);
+          const hasDirectViews = headers.includes('Views');
+          const has1MinuteViews = headers.includes('1-Minute Video Views');
+          
+          if (hasDirectViews) {
+            console.log('✅ Using "Views" column for video/reel view counts');
+          } else if (has1MinuteViews) {
+            console.log('⚠️  "Views" column not found, will use "1-Minute Video Views" as fallback');
+          }
         }
       }
       

@@ -29,14 +29,31 @@ const User = sequelize.define('User', {
     allowNull: false
   },
   role: {
-    type: DataTypes.ENUM('super_admin', 'admin', 'editor', 'analyst', 'api_user'),
+    type: DataTypes.ENUM('super_admin', 'admin', 'editor', 'analyst', 'artist', 'api_user'),
     defaultValue: 'analyst'
+  },
+  artistId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    references: {
+      model: 'Artists',
+      key: 'id'
+    },
+    comment: 'Associated artist for users with artist role'
   },
   isActive: {
     type: DataTypes.BOOLEAN,
     defaultValue: true
   },
   lastLogin: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  resetPasswordToken: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  resetPasswordExpires: {
     type: DataTypes.DATE,
     allowNull: true
   }

@@ -3,11 +3,23 @@ const router = express.Router();
 const { Artist, Post, Delta } = require('../models');
 const { Op } = require('sequelize');
 const dayjs = require('dayjs');
+const { applyArtistFilter } = require('../middleware/artistFilter');
+
+// Apply artist filter middleware
+router.use(applyArtistFilter('Artist'));
 
 // Get all artists
 router.get('/', async (req, res) => {
   try {
+    let where = {};
+    
+    // Apply artist filter if user has artist role
+    if (req.user && req.user.role === 'artist' && req.user.artistId) {
+      where.id = req.user.artistId;
+    }
+    
     const artists = await Artist.findAll({
+      where,
       order: [['name', 'ASC']]
     });
     res.json(artists);

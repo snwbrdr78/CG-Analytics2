@@ -29,15 +29,25 @@ export default function Layout() {
   const [showPasswordModal, setShowPasswordModal] = useState(false)
 
   // Dynamic navigation based on user role
-  const navigation = [
+  const baseNavigation = [
     { name: 'Dashboard', href: '/', icon: HomeIcon },
-    { name: 'Upload', href: '/upload', icon: CloudArrowUpIcon },
-    { name: 'Artists', href: '/artists', icon: UserGroupIcon },
     { name: 'Posts', href: '/posts', icon: VideoCameraIcon },
     { name: 'Analytics', href: '/analytics', icon: ChartBarIcon },
     { name: 'Reports', href: '/reports', icon: DocumentTextIcon },
-    { name: 'Removed', href: '/removed', icon: ArchiveBoxXMarkIcon },
   ]
+  
+  // Add additional navigation items for non-artist users
+  const navigation = user?.role === 'artist' 
+    ? baseNavigation 
+    : [
+        { name: 'Dashboard', href: '/', icon: HomeIcon },
+        { name: 'Upload', href: '/upload', icon: CloudArrowUpIcon },
+        { name: 'Artists', href: '/artists', icon: UserGroupIcon },
+        { name: 'Posts', href: '/posts', icon: VideoCameraIcon },
+        { name: 'Analytics', href: '/analytics', icon: ChartBarIcon },
+        { name: 'Reports', href: '/reports', icon: DocumentTextIcon },
+        { name: 'Removed', href: '/removed', icon: ArchiveBoxXMarkIcon },
+      ]
 
   // Add admin panel for admin and super_admin users
   if (user && (user.role === 'admin' || user.role === 'super_admin')) {

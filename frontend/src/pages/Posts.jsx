@@ -123,14 +123,22 @@ export default function Posts() {
         bValue = Number(b.Snapshots?.[0]?.lifetimeEarnings) || 0
         break
       case 'views':
-        aValue = Number(a.Snapshots?.[0]?.lifetimeQualifiedViews) || 0
-        bValue = Number(b.Snapshots?.[0]?.lifetimeQualifiedViews) || 0
+        aValue = (a.postType === 'Video' || a.postType === 'Reel') && a.lifetimeViews 
+          ? Number(a.lifetimeViews) 
+          : Number(a.Snapshots?.[0]?.lifetimeQualifiedViews) || 0
+        bValue = (b.postType === 'Video' || b.postType === 'Reel') && b.lifetimeViews 
+          ? Number(b.lifetimeViews) 
+          : Number(b.Snapshots?.[0]?.lifetimeQualifiedViews) || 0
         break
       case 'cpm':
         const aEarnings = Number(a.Snapshots?.[0]?.lifetimeEarnings) || 0
-        const aViews = Number(a.Snapshots?.[0]?.lifetimeQualifiedViews) || 0
+        const aViews = (a.postType === 'Video' || a.postType === 'Reel') && a.lifetimeViews 
+          ? Number(a.lifetimeViews) 
+          : Number(a.Snapshots?.[0]?.lifetimeQualifiedViews) || 0
         const bEarnings = Number(b.Snapshots?.[0]?.lifetimeEarnings) || 0
-        const bViews = Number(b.Snapshots?.[0]?.lifetimeQualifiedViews) || 0
+        const bViews = (b.postType === 'Video' || b.postType === 'Reel') && b.lifetimeViews 
+          ? Number(b.lifetimeViews) 
+          : Number(b.Snapshots?.[0]?.lifetimeQualifiedViews) || 0
         aValue = aViews > 0 ? (aEarnings / aViews) * 1000 : 0
         bValue = bViews > 0 ? (bEarnings / bViews) * 1000 : 0
         break
@@ -413,12 +421,27 @@ export default function Posts() {
                           {formatCurrency(latestSnapshot?.lifetimeEarnings || 0)}
                         </td>
                         <td className="w-1/12 px-3 py-4 text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap text-right">
-                          {latestSnapshot?.lifetimeQualifiedViews ? formatViews(latestSnapshot.lifetimeQualifiedViews) : '-'}
+                          <div className="flex flex-col items-end">
+                            <span>
+                              {(post.postType === 'Video' || post.postType === 'Reel') && post.lifetimeViews 
+                                ? formatViews(post.lifetimeViews) 
+                                : latestSnapshot?.lifetimeQualifiedViews 
+                                  ? formatViews(latestSnapshot.lifetimeQualifiedViews) 
+                                  : '-'}
+                            </span>
+                            {post.viewsSource === '1-minute' && (
+                              <span className="text-xs text-gray-500 dark:text-gray-400" title="Based on 1-minute video views">
+                                (1-min views)
+                              </span>
+                            )}
+                          </div>
                         </td>
                         <td className="w-1/12 px-3 py-4 text-sm font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap text-right">
                           {formatCPM(
                             latestSnapshot?.lifetimeEarnings,
-                            latestSnapshot?.lifetimeQualifiedViews
+                            (post.postType === 'Video' || post.postType === 'Reel') && post.lifetimeViews 
+                              ? post.lifetimeViews 
+                              : latestSnapshot?.lifetimeQualifiedViews
                           )}
                         </td>
                         <td className="w-1/12 px-3 py-4">

@@ -96,6 +96,16 @@ const Post = sequelize.define('Post', {
       model: 'Posts',
       key: 'postId'
     }
+  },
+  lifetimeViews: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+    comment: 'Total views across all snapshots'
+  },
+  viewsSource: {
+    type: DataTypes.STRING(50),
+    allowNull: true,
+    comment: 'Source of views data: "views" or "1-minute"'
   }
 }, {
   timestamps: true,

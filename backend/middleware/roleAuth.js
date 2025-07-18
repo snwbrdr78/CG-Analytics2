@@ -2,10 +2,11 @@ const { AuditLog } = require('../models');
 
 // Role hierarchy
 const roleHierarchy = {
-  super_admin: 5,
-  admin: 4,
-  editor: 3,
-  analyst: 2,
+  super_admin: 6,
+  admin: 5,
+  editor: 4,
+  analyst: 3,
+  artist: 2,
   api_user: 1
 };
 
@@ -97,6 +98,15 @@ const requirePermission = (resource, action) => {
           posts: ['read'],
           artists: ['read'],
           reports: ['read'],
+          system: []
+        },
+        artist: {
+          users: [],
+          api_keys: [],
+          sites: [],
+          posts: ['read'], // Will be filtered to their artist only
+          artists: ['read'], // Will be filtered to their artist only
+          reports: ['read'], // Will be filtered to their artist only
           system: []
         },
         api_user: {

@@ -63,7 +63,9 @@ class SnapshotService {
               iterationNumber,
               originalPostId,
               previousIterationId: previousIteration ? previousIteration.postId : null,
-              artistId: previousIteration ? previousIteration.artistId : null // Inherit artist
+              artistId: previousIteration ? previousIteration.artistId : null, // Inherit artist
+              lifetimeViews: postData.views || 0,
+              viewsSource: postData.viewsSource || null
             },
             transaction
           });
@@ -83,10 +85,24 @@ class SnapshotService {
             }, { transaction });
           } else {
             // Update post if needed
+            let needsUpdate = false;
+            
             if (postData.assetTag && !post.assetTag) {
               post.assetTag = postData.assetTag;
+              needsUpdate = true;
+            }
+            
+            // Update lifetime views if higher
+            if (postData.views && (!post.lifetimeViews || postData.views > post.lifetimeViews)) {
+              post.lifetimeViews = postData.views;
+              post.viewsSource = postData.viewsSource;
+              needsUpdate = true;
+            }
+            
+            if (needsUpdate) {
               await post.save({ transaction });
             }
+            
             results.updated.posts++;
           }
 
@@ -109,6 +125,8 @@ class SnapshotService {
                 lifetimeSecondsViewed: latestSnapshot.secondsViewed || 0,
                 threeSecondViews: postData.threeSecondViews || 0,
                 oneMinuteViews: postData.oneMinuteViews || 0,
+                views: postData.views || 0,
+                viewsSource: postData.viewsSource || null,
                 reactions: latestSnapshot.engagement?.reactions || 0,
                 comments: latestSnapshot.engagement?.comments || 0,
                 shares: latestSnapshot.engagement?.shares || 0,

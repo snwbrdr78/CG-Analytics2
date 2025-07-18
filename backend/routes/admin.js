@@ -21,10 +21,7 @@ router.get('/users', requirePermission('users', 'read'), async (req, res) => {
     if (role) where.role = role;
     if (isActive !== undefined) where.isActive = isActive === 'true';
     if (search) {
-      where[Op.or] = [
-        { username: { [Op.iLike]: `%${search}%` } },
-        { email: { [Op.iLike]: `%${search}%` } }
-      ];
+      where.email = { [Op.iLike]: `%${search}%` };
     }
 
     const { count, rows: users } = await User.findAndCountAll({
@@ -32,7 +29,15 @@ router.get('/users', requirePermission('users', 'read'), async (req, res) => {
       limit: parseInt(limit),
       offset: parseInt(offset),
       order: [['createdAt', 'DESC']],
-      attributes: { exclude: ['password'] }
+      attributes: { exclude: ['password'] },
+      include: [
+        {
+          model: Artist,
+          as: 'associatedArtist',
+          attributes: ['id', 'name'],
+          required: false
+        }
+      ]
     });
 
     await AuditLog.logAction({
@@ -59,14 +64,15 @@ router.get('/users', requirePermission('users', 'read'), async (req, res) => {
 // Create new user
 router.post('/users', requirePermission('users', 'create'), async (req, res) => {
   try {
-    const { username, email, password, role, isActive } = req.body;
+    const { email, password, role, isActive, artistId } = req.body;
 
     // Validate role hierarchy - can't create users with higher roles
     const roleHierarchy = {
-      super_admin: 5,
-      admin: 4,
-      editor: 3,
-      analyst: 2,
+      super_admin: 6,
+      admin: 5,
+      editor: 4,
+      analyst: 3,
+      artist: 2,
       api_user: 1
     };
 
@@ -75,13 +81,29 @@ router.post('/users', requirePermission('users', 'create'), async (req, res) => 
         error: 'Cannot create user with higher role than your own' 
       });
     }
+    
+    // Validate artist requirement for artist role
+    if (role === 'artist' && !artistId) {
+      return res.status(400).json({ 
+        error: 'Artist ID is required for users with artist role' 
+      });
+    }
+    
+    // Validate artist exists if provided
+    if (artistId) {
+      const artist = await Artist.findByPk(artistId);
+      if (!artist) {
+        return res.status(400).json({ error: 'Invalid artist ID' });
+      }
+    }
 
     const user = await User.create({
-      username,
+      username: email, // Use email as username for backwards compatibility
       email,
       password,
       role,
-      isActive: isActive !== false
+      isActive: isActive !== false,
+      artistId: role === 'artist' ? artistId : null
     });
 
     await AuditLog.logAction({
@@ -90,7 +112,7 @@ router.post('/users', requirePermission('users', 'create'), async (req, res) => 
       category: 'user_management',
       entityType: 'User',
       entityId: user.id,
-      details: { username, email, role },
+      details: { email, role },
       status: 'success',
       ipAddress: req.ip,
       userAgent: req.get('user-agent')
@@ -110,7 +132,7 @@ router.post('/users', requirePermission('users', 'create'), async (req, res) => 
 router.put('/users/:id', requirePermission('users', 'update'), async (req, res) => {
   try {
     const { id } = req.params;
-    const { username, email, role, isActive } = req.body;
+    const { email, role, isActive, artistId } = req.body;
 
     const user = await User.findByPk(id);
     if (!user) {
@@ -121,12 +143,36 @@ router.put('/users/:id', requirePermission('users', 'update'), async (req, res) 
     if (user.role === 'super_admin' && req.user.role !== 'super_admin') {
       return res.status(403).json({ error: 'Cannot modify super admin' });
     }
+    
+    // Validate artist requirement for artist role
+    if (role === 'artist' && !artistId && !user.artistId) {
+      return res.status(400).json({ 
+        error: 'Artist ID is required for users with artist role' 
+      });
+    }
+    
+    // Validate artist exists if provided
+    if (artistId) {
+      const artist = await Artist.findByPk(artistId);
+      if (!artist) {
+        return res.status(400).json({ error: 'Invalid artist ID' });
+      }
+    }
 
     const updates = {};
-    if (username) updates.username = username;
-    if (email) updates.email = email;
-    if (role) updates.role = role;
+    if (email) {
+      updates.email = email;
+      updates.username = email; // Keep username in sync with email
+    }
+    if (role) {
+      updates.role = role;
+      // Clear artistId if changing from artist role
+      if (role !== 'artist') {
+        updates.artistId = null;
+      }
+    }
     if (isActive !== undefined) updates.isActive = isActive;
+    if (artistId !== undefined) updates.artistId = artistId;
 
     await user.update(updates);
 

@@ -39,6 +39,14 @@ const Snapshot = sequelize.define('Snapshot', {
     type: DataTypes.BIGINT,
     defaultValue: 0
   },
+  views: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0
+  },
+  viewsSource: {
+    type: DataTypes.STRING(50),
+    allowNull: true
+  },
   reactions: {
     type: DataTypes.INTEGER,
     defaultValue: 0

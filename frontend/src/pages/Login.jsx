@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { toast } from 'react-hot-toast'
 import { usePageTitle } from '../hooks/usePageTitle'
+import ForgotPasswordModal from '../components/ForgotPasswordModal'
 
 export default function Login() {
   usePageTitle('Login')
@@ -14,28 +15,24 @@ export default function Login() {
     email: '',
     password: ''
   })
+  const [showForgotPassword, setShowForgotPassword] = useState(false)
 
   const from = location.state?.from?.pathname || '/'
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    console.log('Login form submitted', formData)
     setLoading(true)
 
     try {
       const result = await login(formData.email, formData.password)
-      console.log('Login result:', result)
       
       if (result.success) {
-        console.log('Login successful, navigating to:', from)
         toast.success('Welcome back!')
         navigate(from, { replace: true })
       } else {
-        console.log('Login failed:', result.error)
         toast.error(result.error || 'Login failed')
       }
     } catch (error) {
-      console.error('Login error:', error)
       toast.error('An unexpected error occurred')
     }
     
@@ -97,6 +94,18 @@ export default function Login() {
             </div>
           </div>
 
+          <div className="flex items-center justify-between">
+            <div className="text-sm">
+              <button
+                type="button"
+                onClick={() => setShowForgotPassword(true)}
+                className="font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300"
+              >
+                Forgot your password?
+              </button>
+            </div>
+          </div>
+
           <div>
             <button
               type="submit"
@@ -108,6 +117,11 @@ export default function Login() {
           </div>
         </form>
       </div>
+      
+      <ForgotPasswordModal 
+        isOpen={showForgotPassword} 
+        onClose={() => setShowForgotPassword(false)} 
+      />
     </div>
   )
 }

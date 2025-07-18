@@ -2,6 +2,10 @@ const express = require('express');
 const router = express.Router();
 const { Post, Artist, Snapshot, ReelLink, PostIteration, sequelize } = require('../models');
 const { Op } = require('sequelize');
+const { applyArtistFilter } = require('../middleware/artistFilter');
+
+// Apply artist filter middleware
+router.use(applyArtistFilter('Post'));
 
 // Get all posts with filters
 router.get('/', async (req, res) => {
@@ -16,7 +20,7 @@ router.get('/', async (req, res) => {
       offset = 0 
     } = req.query;
 
-    const where = {};
+    let where = {};
     
     if (status !== 'all') {
       where.status = status;
@@ -39,6 +43,9 @@ router.get('/', async (req, res) => {
         [Op.gte]: new Date(createdAfter)
       };
     }
+    
+    // Apply artist filter if user has artist role
+    where = req.applyArtistFilter(where);
 
     const posts = await Post.findAndCountAll({
       where,

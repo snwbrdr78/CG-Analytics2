@@ -48,6 +48,10 @@ Site.belongsTo(User, { foreignKey: 'addedByUserId', as: 'addedBy' });
 User.hasMany(AuditLog, { foreignKey: 'userId' });
 AuditLog.belongsTo(User, { foreignKey: 'userId' });
 
+// Artist-User association for artist role users
+Artist.hasMany(User, { foreignKey: 'artistId', as: 'associatedUsers' });
+User.belongsTo(Artist, { foreignKey: 'artistId', as: 'associatedArtist' });
+
 module.exports = {
   sequelize,
   Artist,

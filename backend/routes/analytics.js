@@ -3,6 +3,7 @@ const router = express.Router();
 const { Post, Artist, Snapshot, Delta, sequelize } = require('../models');
 const { Op } = require('sequelize');
 const dayjs = require('dayjs');
+const { applyArtistFilter } = require('../middleware/artistFilter');
 
 // Get top performing posts
 router.get('/top-posts', async (req, res) => {

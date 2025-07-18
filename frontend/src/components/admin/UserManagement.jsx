@@ -5,7 +5,8 @@ import {
   PlusIcon,
   PencilIcon,
   TrashIcon,
-  MagnifyingGlassIcon
+  MagnifyingGlassIcon,
+  UserIcon
 } from '@heroicons/react/24/outline';
 import api from '../../utils/api';
 import { toast } from 'react-hot-toast';
@@ -22,16 +23,27 @@ const UserManagement = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [formData, setFormData] = useState({
-    username: '',
     email: '',
     password: '',
     role: 'analyst',
-    isActive: true
+    isActive: true,
+    artistId: ''
   });
+  const [artists, setArtists] = useState([]);
 
   useEffect(() => {
     fetchUsers();
+    fetchArtists();
   }, [page, search, roleFilter]);
+  
+  const fetchArtists = async () => {
+    try {
+      const response = await api.get('/artists');
+      setArtists(response.data);
+    } catch (error) {
+      console.error('Failed to fetch artists:', error);
+    }
+  };
 
   const fetchUsers = async () => {
     try {
@@ -67,11 +79,11 @@ const UserManagement = () => {
       setShowModal(false);
       setEditingUser(null);
       setFormData({
-        username: '',
         email: '',
         password: '',
         role: 'analyst',
-        isActive: true
+        isActive: true,
+        artistId: ''
       });
       fetchUsers();
     } catch (error) {
@@ -82,11 +94,11 @@ const UserManagement = () => {
   const handleEdit = (user) => {
     setEditingUser(user);
     setFormData({
-      username: user.username,
       email: user.email,
       password: '',
       role: user.role,
-      isActive: user.isActive
+      isActive: user.isActive,
+      artistId: user.artistId || ''
     });
     setShowModal(true);
   };
@@ -115,6 +127,7 @@ const UserManagement = () => {
     admin: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
     editor: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
     analyst: 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400',
+    artist: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400',
     api_user: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
   };
 
@@ -134,11 +147,11 @@ const UserManagement = () => {
             onClick={() => {
               setEditingUser(null);
               setFormData({
-                username: '',
                 email: '',
                 password: '',
                 role: 'analyst',
-                isActive: true
+                isActive: true,
+                artistId: ''
               });
               setShowModal(true);
             }}
@@ -196,6 +209,7 @@ const UserManagement = () => {
             <option value="admin">Admin</option>
             <option value="editor">Editor</option>
             <option value="analyst">Analyst</option>
+            <option value="artist">Artist</option>
             <option value="api_user">API User</option>
           </select>
         </div>
@@ -254,25 +268,28 @@ const UserManagement = () => {
               users.map((user) => (
                 <tr key={user.id}>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div>
-                      <div className={`text-sm font-medium ${
-                        darkMode ? 'text-white' : 'text-gray-900'
-                      }`}>
-                        {user.username}
-                      </div>
-                      <div className={`text-sm ${
-                        darkMode ? 'text-gray-400' : 'text-gray-500'
-                      }`}>
-                        {user.email}
-                      </div>
+                    <div className={`text-sm font-medium ${
+                      darkMode ? 'text-white' : 'text-gray-900'
+                    }`}>
+                      {user.email}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 text-xs leading-5 font-semibold rounded-full ${
-                      roleColors[user.role]
-                    }`}>
-                      {user.role.replace('_', ' ')}
-                    </span>
+                    <div>
+                      <span className={`inline-flex px-2 text-xs leading-5 font-semibold rounded-full ${
+                        roleColors[user.role]
+                      }`}>
+                        {user.role.replace('_', ' ')}
+                      </span>
+                      {user.role === 'artist' && user.associatedArtist && (
+                        <div className={`mt-1 text-xs ${
+                          darkMode ? 'text-gray-400' : 'text-gray-500'
+                        }`}>
+                          <UserIcon className="inline h-3 w-3 mr-1" />
+                          {user.associatedArtist.name}
+                        </div>
+                      )}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex px-2 text-xs leading-5 font-semibold rounded-full ${
@@ -371,25 +388,6 @@ const UserManagement = () => {
                     <label className={`block text-sm font-medium ${
                       darkMode ? 'text-gray-300' : 'text-gray-700'
                     }`}>
-                      Username
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.username}
-                      onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                      className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
-                        darkMode
-                          ? 'bg-gray-700 border-gray-600 text-white'
-                          : 'bg-white border-gray-300 text-gray-900'
-                      }`}
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className={`block text-sm font-medium ${
-                      darkMode ? 'text-gray-300' : 'text-gray-700'
-                    }`}>
                       Email
                     </label>
                     <input
@@ -447,9 +445,42 @@ const UserManagement = () => {
                       <option value="admin">Admin</option>
                       <option value="editor">Editor</option>
                       <option value="analyst">Analyst</option>
+                      <option value="artist">Artist</option>
                       <option value="api_user">API User</option>
                     </select>
                   </div>
+                  
+                  {formData.role === 'artist' && (
+                    <div>
+                      <label className={`block text-sm font-medium ${
+                        darkMode ? 'text-gray-300' : 'text-gray-700'
+                      }`}>
+                        Associated Artist <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        value={formData.artistId}
+                        onChange={(e) => setFormData({ ...formData, artistId: e.target.value })}
+                        required={formData.role === 'artist'}
+                        className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
+                          darkMode
+                            ? 'bg-gray-700 border-gray-600 text-white'
+                            : 'bg-white border-gray-300 text-gray-900'
+                        }`}
+                      >
+                        <option value="">Select an artist</option>
+                        {artists.map((artist) => (
+                          <option key={artist.id} value={artist.id}>
+                            {artist.name}
+                          </option>
+                        ))}
+                      </select>
+                      <p className={`mt-1 text-xs ${
+                        darkMode ? 'text-gray-400' : 'text-gray-500'
+                      }`}>
+                        This user will only be able to view data for the selected artist
+                      </p>
+                    </div>
+                  )}
                   
                   <div className="flex items-center">
                     <input
