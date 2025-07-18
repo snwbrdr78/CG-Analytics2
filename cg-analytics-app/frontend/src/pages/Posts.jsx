@@ -38,8 +38,10 @@ export default function Posts() {
   }
 
   const formatCPM = (earnings, views) => {
-    if (!views || views === 0) return '-'
-    return `$${((earnings / views) * 1000).toFixed(2)}`
+    const numEarnings = Number(earnings) || 0
+    const numViews = Number(views) || 0
+    if (numViews === 0) return '-'
+    return `$${((numEarnings / numViews) * 1000).toFixed(2)}`
   }
 
   return (
@@ -163,7 +165,7 @@ export default function Posts() {
                           ${latestSnapshot?.lifetimeEarnings ? Number(latestSnapshot.lifetimeEarnings).toFixed(2) : '0.00'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {latestSnapshot?.lifetimeQualifiedViews?.toLocaleString() || '-'}
+                          {latestSnapshot?.lifetimeQualifiedViews ? Number(latestSnapshot.lifetimeQualifiedViews).toLocaleString() : '-'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           {formatCPM(
