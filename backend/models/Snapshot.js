@@ -89,6 +89,69 @@ const Snapshot = sequelize.define('Snapshot', {
       key: 'id'
     },
     comment: 'Link to OAuth site that synced this snapshot'
+  },
+  // Additional platform metrics
+  impressions: {
+    type: DataTypes.BIGINT,
+    allowNull: true,
+    defaultValue: 0,
+    comment: 'Total impressions'
+  },
+  reach: {
+    type: DataTypes.BIGINT,
+    allowNull: true,
+    defaultValue: 0,
+    comment: 'Unique reach count'
+  },
+  saves: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    defaultValue: 0,
+    comment: 'Save/bookmark count'
+  },
+  profileVisits: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    defaultValue: 0,
+    comment: 'Profile visits from post'
+  },
+  avgWatchPercentage: {
+    type: DataTypes.DECIMAL(5, 2),
+    allowNull: true,
+    comment: 'Average watch percentage'
+  },
+  // Geographic and demographic data
+  viewsByCountry: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+    comment: 'Views breakdown by country'
+  },
+  demographicData: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+    comment: 'Age, gender, location breakdown'
+  },
+  trafficSource: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+    comment: 'Traffic source breakdown'
+  },
+  deviceType: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+    comment: 'Device type breakdown'
+  },
+  // YouTube specific
+  subscribersGained: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    defaultValue: 0,
+    comment: 'Subscribers gained (YouTube)'
+  },
+  estimatedCpm: {
+    type: DataTypes.DECIMAL(10, 4),
+    allowNull: true,
+    comment: 'Estimated CPM rate'
   }
 }, {
   timestamps: true,

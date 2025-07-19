@@ -16,8 +16,9 @@ const Site = sequelize.define('Site', {
     }
   },
   platform: {
-    type: DataTypes.ENUM('facebook', 'instagram', 'youtube'),
-    defaultValue: 'facebook'
+    type: DataTypes.ENUM('facebook', 'instagram', 'youtube', 'tiktok', 'twitter', 'threads'),
+    defaultValue: 'facebook',
+    comment: 'Social media platform'
   },
   platformId: {
     type: DataTypes.STRING,
@@ -31,6 +32,60 @@ const Site = sequelize.define('Site', {
   platformUsername: {
     type: DataTypes.STRING,
     allowNull: true
+  },
+  // OAuth and API fields
+  scope: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+    comment: 'OAuth scopes/permissions granted'
+  },
+  webhookUrl: {
+    type: DataTypes.STRING(500),
+    allowNull: true,
+    comment: 'Platform webhook endpoint'
+  },
+  webhookSecret: {
+    type: DataTypes.STRING(255),
+    allowNull: true,
+    comment: 'Webhook verification secret'
+  },
+  businessAccountId: {
+    type: DataTypes.STRING(255),
+    allowNull: true,
+    comment: 'Business/Ad account ID'
+  },
+  // Profile information
+  followerCount: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    defaultValue: 0,
+    comment: 'Current follower/subscriber count'
+  },
+  profileImageUrl: {
+    type: DataTypes.STRING(500),
+    allowNull: true,
+    comment: 'Profile/avatar image URL'
+  },
+  coverImageUrl: {
+    type: DataTypes.STRING(500),
+    allowNull: true,
+    comment: 'Cover/banner image URL'
+  },
+  bio: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+    comment: 'Channel/page description'
+  },
+  // API rate limiting
+  apiQuota: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    comment: 'API call quota limit'
+  },
+  apiQuotaReset: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    comment: 'When API quota resets'
   },
   userId: {
     type: DataTypes.UUID,

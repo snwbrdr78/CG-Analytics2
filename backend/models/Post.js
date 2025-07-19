@@ -127,6 +127,79 @@ const Post = sequelize.define('Post', {
     allowNull: true,
     comment: 'Last time this post was synced from OAuth'
   },
+  // Media details
+  thumbnailUrl: {
+    type: DataTypes.STRING(500),
+    allowNull: true,
+    comment: 'Video/post thumbnail URL'
+  },
+  videoUrl: {
+    type: DataTypes.STRING(500),
+    allowNull: true,
+    comment: 'Direct video URL'
+  },
+  aspectRatio: {
+    type: DataTypes.STRING(20),
+    allowNull: true,
+    comment: 'Media aspect ratio (e.g., 16:9)'
+  },
+  resolution: {
+    type: DataTypes.STRING(20),
+    allowNull: true,
+    comment: 'Video resolution (e.g., 1920x1080)'
+  },
+  // Social features
+  hashtags: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+    defaultValue: [],
+    comment: 'Array of hashtags used'
+  },
+  mentions: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+    defaultValue: [],
+    comment: 'Array of mentioned accounts'
+  },
+  // Cross-platform data
+  crosspostingStatus: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+    comment: 'Cross-posting status by platform'
+  },
+  originalPlatform: {
+    type: DataTypes.STRING(50),
+    allowNull: true,
+    comment: 'Original platform if cross-posted'
+  },
+  // Monetization and restrictions
+  monetizationStatus: {
+    type: DataTypes.STRING(50),
+    allowNull: true,
+    comment: 'Platform monetization eligibility'
+  },
+  restrictedCountries: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+    defaultValue: [],
+    comment: 'Countries where content is restricted'
+  },
+  contentCategory: {
+    type: DataTypes.STRING(100),
+    allowNull: true,
+    comment: 'Platform content category'
+  },
+  audioCopyright: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+    comment: 'Audio copyright claims info'
+  },
+  privacyStatus: {
+    type: DataTypes.ENUM('public', 'private', 'unlisted'),
+    allowNull: true,
+    defaultValue: 'public',
+    comment: 'Content privacy setting'
+  },
   platform: {
     type: DataTypes.STRING(50),
     allowNull: true,

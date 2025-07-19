@@ -33,6 +33,23 @@ const Artist = sequelize.define('Artist', {
   },
   notes: {
     type: DataTypes.TEXT
+  },
+  // Social media presence
+  socialMediaHandles: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+    comment: 'Social media handles by platform'
+  },
+  primaryPlatform: {
+    type: DataTypes.STRING(50),
+    allowNull: true,
+    comment: 'Main platform for the artist'
+  },
+  verifiedPlatforms: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+    defaultValue: [],
+    comment: 'List of verified platform names'
   }
 }, {
   timestamps: true

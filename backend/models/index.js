@@ -10,6 +10,8 @@ const Site = require('./Site');
 const AuditLog = require('./AuditLog');
 const PostIteration = require('./PostIteration');
 const SiteSetting = require('./SiteSetting');
+const SyncLog = require('./SyncLog');
+const WebhookEvent = require('./WebhookEvent');
 
 // Define associations
 Artist.hasMany(Post, { foreignKey: 'artistId' });
@@ -57,6 +59,22 @@ User.belongsTo(Artist, { foreignKey: 'artistId', as: 'associatedArtist' });
 Site.hasMany(SiteSetting, { foreignKey: 'siteId', as: 'siteSettings' });
 SiteSetting.belongsTo(Site, { foreignKey: 'siteId', as: 'site' });
 
+// SyncLog associations
+Site.hasMany(SyncLog, { foreignKey: 'siteId', as: 'syncLogs' });
+SyncLog.belongsTo(Site, { foreignKey: 'siteId', as: 'site' });
+
+// WebhookEvent associations
+Site.hasMany(WebhookEvent, { foreignKey: 'siteId', as: 'webhookEvents' });
+WebhookEvent.belongsTo(Site, { foreignKey: 'siteId', as: 'site' });
+
+// Post-Site association for OAuth synced posts
+Post.belongsTo(Site, { foreignKey: 'siteId', as: 'syncedFromSite' });
+Site.hasMany(Post, { foreignKey: 'siteId', as: 'syncedPosts' });
+
+// Snapshot-Site association for OAuth synced snapshots
+Snapshot.belongsTo(Site, { foreignKey: 'siteId', as: 'syncedFromSite' });
+Site.hasMany(Snapshot, { foreignKey: 'siteId', as: 'syncedSnapshots' });
+
 module.exports = {
   sequelize,
   Artist,
@@ -69,5 +87,7 @@ module.exports = {
   Site,
   AuditLog,
   PostIteration,
-  SiteSetting
+  SiteSetting,
+  SyncLog,
+  WebhookEvent
 };
