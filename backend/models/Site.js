@@ -1,5 +1,6 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
+const crypto = require('crypto');
 
 const Site = sequelize.define('Site', {
   id: {
@@ -20,14 +21,34 @@ const Site = sequelize.define('Site', {
   },
   platformId: {
     type: DataTypes.STRING,
+    allowNull: true,
+    unique: false // Changed to allow multiple accounts per platform
+  },
+  platformUserId: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  platformUsername: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  userId: {
+    type: DataTypes.UUID,
     allowNull: false,
-    unique: true // Unique identifier from the platform
+    references: {
+      model: 'Users',
+      key: 'id'
+    }
   },
   accessToken: {
     type: DataTypes.TEXT,
     allowNull: true // Encrypted token for API access
   },
-  tokenExpiresAt: {
+  refreshToken: {
+    type: DataTypes.TEXT,
+    allowNull: true // Encrypted refresh token
+  },
+  tokenExpiry: {
     type: DataTypes.DATE,
     allowNull: true
   },
@@ -80,6 +101,36 @@ const Site = sequelize.define('Site', {
   timestamps: true
 });
 
+// Encryption key from environment or generate one
+const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || crypto.randomBytes(32).toString('hex').slice(0, 32);
+const IV_LENGTH = 16;
+
+// Static methods for encryption
+Site.encryptToken = function(token) {
+  if (!token) return null;
+  const iv = crypto.randomBytes(IV_LENGTH);
+  const cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(ENCRYPTION_KEY), iv);
+  let encrypted = cipher.update(token);
+  encrypted = Buffer.concat([encrypted, cipher.final()]);
+  return iv.toString('hex') + ':' + encrypted.toString('hex');
+};
+
+Site.decryptToken = function(encryptedToken) {
+  if (!encryptedToken) return null;
+  try {
+    const parts = encryptedToken.split(':');
+    const iv = Buffer.from(parts.shift(), 'hex');
+    const encryptedText = Buffer.from(parts.join(':'), 'hex');
+    const decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(ENCRYPTION_KEY), iv);
+    let decrypted = decipher.update(encryptedText);
+    decrypted = Buffer.concat([decrypted, decipher.final()]);
+    return decrypted.toString();
+  } catch (error) {
+    console.error('Failed to decrypt token:', error);
+    return null;
+  }
+};
+
 // Instance methods
 Site.prototype.toJSON = function() {
   const values = Object.assign({}, this.get());
@@ -87,7 +138,26 @@ Site.prototype.toJSON = function() {
   if (values.accessToken) {
     values.accessToken = '***hidden***';
   }
+  if (values.refreshToken) {
+    values.refreshToken = '***hidden***';
+  }
   return values;
+};
+
+Site.prototype.getDecryptedToken = function() {
+  return Site.decryptToken(this.accessToken);
+};
+
+Site.prototype.getDecryptedRefreshToken = function() {
+  return Site.decryptToken(this.refreshToken);
+};
+
+Site.prototype.setAccessToken = function(token) {
+  this.accessToken = Site.encryptToken(token);
+};
+
+Site.prototype.setRefreshToken = function(token) {
+  this.refreshToken = Site.encryptToken(token);
 };
 
 module.exports = Site;

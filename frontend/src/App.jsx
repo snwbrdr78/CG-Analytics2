@@ -15,6 +15,7 @@ import Analytics from './pages/Analytics'
 import Reports from './pages/Reports'
 import RemovedContent from './pages/RemovedContent'
 import AdminPanel from './pages/AdminPanel'
+import FacebookIntegration from './pages/FacebookIntegration'
 
 const queryClient = new QueryClient()
 
@@ -39,6 +40,7 @@ function App() {
                 <Route path="/reports" element={<Reports />} />
                 <Route path="/removed" element={<RemovedContent />} />
                 <Route path="/admin" element={<AdminPanel />} />
+                <Route path="/integrations/facebook" element={<FacebookIntegration />} />
               </Route>
             </Routes>
             <Toaster position="top-right" />

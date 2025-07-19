@@ -34,6 +34,13 @@ Comedy Genius Analytics is a full-stack application that processes Facebook Crea
 - **Audit Logging**: Complete activity tracking
 - **Password Security**: Strength requirements and change functionality
 
+### Social Media Integrations
+- **OAuth Authentication**: Secure connections to Facebook, Instagram, and YouTube
+- **Multi-Account Support**: Connect unlimited accounts per platform
+- **Modular Features**: Enable/disable specific features per account
+- **Automated Syncing**: Configurable sync intervals and data retention
+- **Unified Management**: All integrations managed through Sites interface
+
 ## Versioning
 
 This project follows a specific semantic versioning schema. Please see [VERSIONING.md](VERSIONING.md) for detailed guidelines on version numbering and updates.
@@ -137,6 +144,9 @@ CG-Analytics2/
 │   ├── routes/         # API routes
 │   ├── scripts/        # Utility scripts
 │   ├── services/       # Business logic
+│   │   ├── facebook/   # Facebook API integration
+│   │   ├── instagram/  # Instagram API integration
+│   │   └── youtube/    # YouTube API integration
 │   └── utils/          # Helper utilities
 ├── frontend/
 │   ├── public/         # Static assets
@@ -182,6 +192,13 @@ CG-Analytics2/
 - `GET /api/admin/api-keys` - Manage API keys
 - `GET /api/admin/audit-logs` - View audit logs
 - `GET /api/admin/stats` - System statistics
+- `GET /api/admin/sites` - Manage social media connections
+
+### Social Media APIs
+- `GET /api/facebook/auth/start` - Start Facebook OAuth
+- `GET /api/instagram/auth/start` - Start Instagram OAuth  
+- `GET /api/youtube/auth/start` - Start YouTube OAuth
+- `POST /api/*/accounts/:id/features/:feature` - Toggle platform features
 
 ## Configuration
 
@@ -207,6 +224,14 @@ REDIS_PORT=6379
 # Server
 PORT=5000
 NODE_ENV=production
+
+# OAuth (Optional - for social media integrations)
+FACEBOOK_APP_ID=your_facebook_app_id
+FACEBOOK_APP_SECRET=your_facebook_app_secret
+INSTAGRAM_CLIENT_ID=your_instagram_client_id
+INSTAGRAM_CLIENT_SECRET=your_instagram_client_secret
+YOUTUBE_CLIENT_ID=your_youtube_client_id
+YOUTUBE_CLIENT_SECRET=your_youtube_client_secret
 ```
 
 ### User Roles
@@ -274,6 +299,14 @@ See [NAMING_STANDARDS.md](./NAMING_STANDARDS.md) for coding standards and conven
    - Ensure proper CSV format from Facebook
 
 ## Recent Updates
+
+### Version 1.1.0 (2025-01-19)
+- Added comprehensive social media integrations (Facebook, Instagram, YouTube)
+- OAuth 2.0 authentication for secure platform connections
+- Modular feature management for each connected account
+- Unified Sites management interface for all integrations
+- Support for unlimited accounts per platform
+- Automated content syncing with configurable intervals
 
 ### Version 1.0.0 (2025-01-18)
 - Major UI/UX improvements with enterprise formatting

@@ -28,6 +28,15 @@ const AdminPanel = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // Check URL params and set active tab
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tabParam = params.get('tab');
+    if (tabParam) {
+      setActiveTab(tabParam);
+    }
+  }, []);
+
   // Check if user has admin access
   useEffect(() => {
     if (!user || (user.role !== 'admin' && user.role !== 'super_admin')) {

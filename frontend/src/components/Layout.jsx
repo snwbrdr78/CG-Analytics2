@@ -18,7 +18,8 @@ import {
   MoonIcon,
   Cog6ToothIcon,
   LockClosedIcon,
-  ChevronUpIcon
+  ChevronUpIcon,
+  ShareIcon
 } from '@heroicons/react/24/outline'
 
 export default function Layout() {
@@ -57,6 +58,8 @@ export default function Layout() {
       icon: Cog6ToothIcon
     })
   }
+
+  // Facebook integration moved to Admin Panel
 
   const handleLogout = async () => {
     await logout()

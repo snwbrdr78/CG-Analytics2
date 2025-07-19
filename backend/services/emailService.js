@@ -3,7 +3,7 @@ const nodemailer = require('nodemailer');
 class EmailService {
   constructor() {
     // Configure email transporter based on environment
-    if (process.env.NODE_ENV === 'production') {
+    if (process.env.NODE_ENV === 'production' && process.env.SMTP_USER && process.env.SMTP_USER !== 'your-email@gmail.com') {
       // Production email configuration
       // You can use services like SendGrid, AWS SES, etc.
       this.transporter = nodemailer.createTransport({

@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const multer = require('multer');
 const path = require('path');
+const session = require('express-session');
 require('dotenv').config();
 
 const { sequelize } = require('./models');
@@ -15,6 +16,9 @@ const reportsRoutes = require('./routes/reports');
 const adminRoutes = require('./routes/admin');
 const videoReelsRoutes = require('./routes/videoReels');
 const contentMatchingRoutes = require('./routes/contentMatching');
+const facebookRoutes = require('./routes/facebook');
+const instagramRoutes = require('./routes/instagram');
+const youtubeRoutes = require('./routes/youtube');
 const { authenticateToken } = require('./middleware/auth');
 
 const app = express();
@@ -24,6 +28,18 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Session for OAuth
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'cg-analytics-session-secret',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    maxAge: 1000 * 60 * 15 // 15 minutes
+  }
+}));
 
 // Disable caching for API responses
 app.use('/api', (req, res, next) => {
@@ -82,6 +98,9 @@ app.use('/api/reports', authenticateToken, reportsRoutes);
 app.use('/api/admin', authenticateToken, adminRoutes);
 app.use('/api/video-reels', authenticateToken, videoReelsRoutes);
 app.use('/api/content-matching', authenticateToken, contentMatchingRoutes);
+app.use('/api/facebook', facebookRoutes);
+app.use('/api/instagram', instagramRoutes);
+app.use('/api/youtube', youtubeRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
@@ -144,6 +163,19 @@ async function startServer() {
     //   await sequelize.sync({ alter: true });
     //   console.log('Database models synchronized.');
     // }
+    
+    // Initialize Facebook sync queue if Redis is available
+    try {
+      const { scheduleRecurringSyncs, cleanOldJobs } = require('./queues/facebookSyncQueue');
+      await scheduleRecurringSyncs();
+      
+      // Clean old jobs every day
+      setInterval(cleanOldJobs, 24 * 60 * 60 * 1000);
+      
+      console.log('Facebook sync queue initialized');
+    } catch (error) {
+      console.warn('Facebook sync queue not initialized (Redis may not be available):', error.message);
+    }
     
     // Start server - listen on all network interfaces
     app.listen(PORT, '0.0.0.0', () => {

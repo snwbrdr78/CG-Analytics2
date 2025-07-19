@@ -9,6 +9,7 @@ const ApiKey = require('./ApiKey');
 const Site = require('./Site');
 const AuditLog = require('./AuditLog');
 const PostIteration = require('./PostIteration');
+const SiteSetting = require('./SiteSetting');
 
 // Define associations
 Artist.hasMany(Post, { foreignKey: 'artistId' });
@@ -52,6 +53,10 @@ AuditLog.belongsTo(User, { foreignKey: 'userId' });
 Artist.hasMany(User, { foreignKey: 'artistId', as: 'associatedUsers' });
 User.belongsTo(Artist, { foreignKey: 'artistId', as: 'associatedArtist' });
 
+// Site-SiteSetting association
+Site.hasMany(SiteSetting, { foreignKey: 'siteId', as: 'siteSettings' });
+SiteSetting.belongsTo(Site, { foreignKey: 'siteId', as: 'site' });
+
 module.exports = {
   sequelize,
   Artist,
@@ -63,5 +68,6 @@ module.exports = {
   ApiKey,
   Site,
   AuditLog,
-  PostIteration
+  PostIteration,
+  SiteSetting
 };
