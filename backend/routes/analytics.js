@@ -243,17 +243,20 @@ router.get('/compare-periods', async (req, res) => {
 // Get dashboard summary
 router.get('/dashboard', async (req, res) => {
   try {
-    // Get latest totals
+    // Get latest totals - include all data sources
     const latestSnapshots = await sequelize.query(`
       SELECT 
         SUM(s."lifetimeEarnings") as total_earnings,
         SUM(s."lifetimeQualifiedViews") as total_views,
-        COUNT(DISTINCT s."postId") as total_posts
+        COUNT(DISTINCT s."postId") as total_posts,
+        COUNT(DISTINCT CASE WHEN s."dataSource" = 'csv' THEN s."postId" END) as csv_posts,
+        COUNT(DISTINCT CASE WHEN s."dataSource" != 'csv' THEN s."postId" END) as oauth_posts
       FROM (
         SELECT DISTINCT ON ("postId") 
           "postId", 
           "lifetimeEarnings", 
-          "lifetimeQualifiedViews"
+          "lifetimeQualifiedViews",
+          "dataSource"
         FROM "Snapshots"
         ORDER BY "postId", "snapshotDate" DESC
       ) s
@@ -293,11 +296,30 @@ router.get('/dashboard', async (req, res) => {
       group: ['postType']
     });
 
+    // Get platform breakdown
+    const platformCounts = await Post.findAll({
+      attributes: [
+        'platform',
+        [sequelize.fn('COUNT', sequelize.col('postId')), 'count']
+      ],
+      where: {
+        platform: { [Op.ne]: null }
+      },
+      group: ['platform']
+    });
+
     res.json({
-      lifetime: latestSnapshots[0] || { total_earnings: 0, total_views: 0, total_posts: 0 },
+      lifetime: {
+        ...latestSnapshots[0] || { total_earnings: 0, total_views: 0, total_posts: 0 },
+        dataSources: {
+          csv: latestSnapshots[0]?.csv_posts || 0,
+          oauth: latestSnapshots[0]?.oauth_posts || 0
+        }
+      },
       thisMonth: monthSummary,
       statusBreakdown: statusCounts || [],
-      typeBreakdown: typeCounts || []
+      typeBreakdown: typeCounts || [],
+      platformBreakdown: platformCounts || []
     });
   } catch (error) {
     res.status(500).json({ error: error.message });

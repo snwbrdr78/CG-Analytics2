@@ -159,9 +159,20 @@ const SiteManagement = () => {
 
   const handleSync = async (siteId) => {
     try {
-      await api.post(`/admin/sites/${siteId}/sync`);
-      toast.success('Sync initiated successfully');
-      fetchSites();
+      const response = await api.post(`/sync/site/${siteId}`);
+      toast.success(`Sync initiated successfully! Job ID: ${response.data.jobId}`);
+      
+      // Update the site to show syncing status
+      setSites(prevSites => 
+        prevSites.map(site => 
+          site.id === siteId 
+            ? { ...site, syncStatus: 'syncing' }
+            : site
+        )
+      );
+      
+      // Refresh sites after a delay to show updated status
+      setTimeout(() => fetchSites(), 5000);
     } catch (error) {
       toast.error(error.response?.data?.error || 'Failed to initiate sync');
     }
@@ -264,7 +275,22 @@ const SiteManagement = () => {
             Connect and manage your social media accounts via OAuth authentication
           </p>
         </div>
-        <div className="mt-5 flex lg:mt-0 lg:ml-4">
+        <div className="mt-5 flex lg:mt-0 lg:ml-4 space-x-3">
+          <button
+            onClick={async () => {
+              try {
+                const response = await api.post('/sync/all');
+                toast.success(`Full sync initiated! Job ID: ${response.data.jobId}`);
+                setTimeout(() => fetchSites(), 5000);
+              } catch (error) {
+                toast.error(error.response?.data?.error || 'Failed to initiate sync');
+              }
+            }}
+            className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600"
+          >
+            <ArrowPathIcon className="-ml-1 mr-2 h-5 w-5" />
+            Sync All
+          </button>
           <button
             onClick={() => setShowPlatformModal(true)}
             className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
@@ -423,10 +449,11 @@ const SiteManagement = () => {
                   </button>
                   <button
                     onClick={() => handleSync(site.id)}
-                    className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                    className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 disabled:opacity-50"
                     title="Sync now"
+                    disabled={site.syncStatus === 'syncing'}
                   >
-                    <ArrowPathIcon className="h-5 w-5" />
+                    <ArrowPathIcon className={`h-5 w-5 ${site.syncStatus === 'syncing' ? 'animate-spin' : ''}`} />
                   </button>
                   <button
                     onClick={() => handleEdit(site)}

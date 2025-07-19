@@ -74,6 +74,21 @@ const Snapshot = sequelize.define('Snapshot', {
   rawData: {
     type: DataTypes.JSONB,
     comment: 'Complete row data for reference'
+  },
+  dataSource: {
+    type: DataTypes.STRING(50),
+    defaultValue: 'csv',
+    allowNull: false,
+    comment: 'Source of data: csv, facebook, instagram, youtube'
+  },
+  siteId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    references: {
+      model: 'Sites',
+      key: 'id'
+    },
+    comment: 'Link to OAuth site that synced this snapshot'
   }
 }, {
   timestamps: true,
@@ -87,6 +102,12 @@ const Snapshot = sequelize.define('Snapshot', {
     },
     {
       fields: ['quarterRange']
+    },
+    {
+      fields: ['dataSource']
+    },
+    {
+      fields: ['siteId']
     }
   ]
 });

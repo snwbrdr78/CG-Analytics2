@@ -379,6 +379,51 @@ export default function Dashboard() {
           </table>
         </div>
       </div>
+
+      {/* Data Sources Card */}
+      {dashboard?.lifetime?.dataSources && (
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            Data Sources
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                {formatNumber(dashboard.lifetime.dataSources.csv || 0)}
+              </div>
+              <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center justify-center mt-1">
+                <span className="inline-block w-2 h-2 bg-gray-500 rounded-full mr-2"></span>
+                CSV Uploads
+              </div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                {formatNumber(dashboard.lifetime.dataSources.oauth || 0)}
+              </div>
+              <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center justify-center mt-1">
+                <span className="inline-block w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+                Connected Accounts
+              </div>
+            </div>
+            {dashboard?.platformBreakdown?.map((platform) => (
+              <div key={platform.platform} className="text-center">
+                <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {formatNumber(platform.count || 0)}
+                </div>
+                <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center justify-center mt-1">
+                  <span className={`inline-block w-2 h-2 rounded-full mr-2 ${
+                    platform.platform === 'facebook' ? 'bg-blue-600' :
+                    platform.platform === 'instagram' ? 'bg-pink-600' :
+                    platform.platform === 'youtube' ? 'bg-red-600' :
+                    'bg-gray-500'
+                  }`}></span>
+                  {platform.platform?.charAt(0).toUpperCase() + platform.platform?.slice(1)}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

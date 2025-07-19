@@ -65,7 +65,9 @@ class SnapshotService {
               previousIterationId: previousIteration ? previousIteration.postId : null,
               artistId: previousIteration ? previousIteration.artistId : null, // Inherit artist
               lifetimeViews: postData.views || 0,
-              viewsSource: postData.viewsSource || null
+              viewsSource: postData.viewsSource || null,
+              dataSource: 'csv',
+              platform: 'facebook'
             },
             transaction
           });
@@ -134,7 +136,8 @@ class SnapshotService {
                 earningsColumn: latestSnapshot.earnings ? 
                   (postData.approximateEarnings ? 'approximate' : 'estimated') : null,
                 quarterRange: postData.quarterRange,
-                rawData: postData
+                rawData: postData,
+                dataSource: 'csv'
               },
               transaction
             });

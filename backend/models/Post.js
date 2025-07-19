@@ -106,6 +106,31 @@ const Post = sequelize.define('Post', {
     type: DataTypes.STRING(50),
     allowNull: true,
     comment: 'Source of views data: "views" or "1-minute"'
+  },
+  dataSource: {
+    type: DataTypes.STRING(50),
+    defaultValue: 'csv',
+    allowNull: false,
+    comment: 'Source of data: csv, facebook, instagram, youtube'
+  },
+  siteId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    references: {
+      model: 'Sites',
+      key: 'id'
+    },
+    comment: 'Link to OAuth site that synced this post'
+  },
+  lastSyncedAt: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    comment: 'Last time this post was synced from OAuth'
+  },
+  platform: {
+    type: DataTypes.STRING(50),
+    allowNull: true,
+    comment: 'Platform: facebook, instagram, youtube'
   }
 }, {
   timestamps: true,
@@ -124,6 +149,15 @@ const Post = sequelize.define('Post', {
     },
     {
       fields: ['parentPostId']
+    },
+    {
+      fields: ['dataSource']
+    },
+    {
+      fields: ['siteId']
+    },
+    {
+      fields: ['platform']
     }
   ]
 });

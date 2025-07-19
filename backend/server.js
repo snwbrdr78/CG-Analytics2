@@ -19,6 +19,7 @@ const contentMatchingRoutes = require('./routes/contentMatching');
 const facebookRoutes = require('./routes/facebook');
 const instagramRoutes = require('./routes/instagram');
 const youtubeRoutes = require('./routes/youtube');
+const syncRoutes = require('./routes/sync');
 const { authenticateToken } = require('./middleware/auth');
 
 const app = express();
@@ -101,6 +102,7 @@ app.use('/api/content-matching', authenticateToken, contentMatchingRoutes);
 app.use('/api/facebook', facebookRoutes);
 app.use('/api/instagram', instagramRoutes);
 app.use('/api/youtube', youtubeRoutes);
+app.use('/api/sync', authenticateToken, syncRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
@@ -164,17 +166,17 @@ async function startServer() {
     //   console.log('Database models synchronized.');
     // }
     
-    // Initialize Facebook sync queue if Redis is available
+    // Initialize unified sync queue if Redis is available
     try {
-      const { scheduleRecurringSyncs, cleanOldJobs } = require('./queues/facebookSyncQueue');
+      const { scheduleRecurringSyncs, cleanOldJobs } = require('./queues/unifiedSyncQueue');
       await scheduleRecurringSyncs();
       
       // Clean old jobs every day
       setInterval(cleanOldJobs, 24 * 60 * 60 * 1000);
       
-      console.log('Facebook sync queue initialized');
+      console.log('Unified sync queue initialized');
     } catch (error) {
-      console.warn('Facebook sync queue not initialized (Redis may not be available):', error.message);
+      console.warn('Unified sync queue not initialized (Redis may not be available):', error.message);
     }
     
     // Start server - listen on all network interfaces
