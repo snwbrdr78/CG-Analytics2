@@ -188,6 +188,32 @@ router.get('/accounts', authenticateToken, async (req, res) => {
   }
 });
 
+// Get features for a site
+router.get('/accounts/:siteId/features', authenticateToken, async (req, res) => {
+  try {
+    const { siteId } = req.params;
+
+    const site = await Site.findOne({
+      where: {
+        id: siteId,
+        platform: 'instagram'
+      }
+    });
+
+    if (!site) {
+      return res.status(404).json({ error: 'Instagram account not found' });
+    }
+
+    const api = new InstagramAPIService();
+    await api.initialize(site.id);
+    const features = await api.getAvailableFeatures();
+
+    res.json(features);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Toggle feature
 router.post('/accounts/:siteId/features/:feature', authenticateToken, async (req, res) => {
   try {

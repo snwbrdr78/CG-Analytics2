@@ -1,11 +1,16 @@
 const Bull = require('bull');
 const UnifiedSyncService = require('../services/UnifiedSyncService');
 
-// Create queue
+// Create queue with better error handling
 const unifiedSyncQueue = new Bull('unified-sync', {
   redis: {
     host: process.env.REDIS_HOST || 'localhost',
-    port: process.env.REDIS_PORT || 6379
+    port: process.env.REDIS_PORT || 6379,
+    maxRetriesPerRequest: 3,
+    retryStrategy: (times) => {
+      if (times > 3) return null;
+      return Math.min(times * 100, 3000);
+    }
   }
 });
 

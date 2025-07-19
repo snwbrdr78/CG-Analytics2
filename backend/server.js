@@ -168,6 +168,25 @@ async function startServer() {
     
     // Initialize unified sync queue if Redis is available
     try {
+      // Check if Redis is available first
+      const Bull = require('bull');
+      const testQueue = new Bull('test-redis-connection', {
+        redis: {
+          host: process.env.REDIS_HOST || 'localhost',
+          port: process.env.REDIS_PORT || 6379,
+          maxRetriesPerRequest: 3,
+          retryStrategy: (times) => {
+            if (times > 3) return null;
+            return Math.min(times * 100, 3000);
+          }
+        }
+      });
+      
+      // Try to ping Redis
+      await testQueue.client.ping();
+      await testQueue.close();
+      
+      // If we get here, Redis is available
       const { scheduleRecurringSyncs, cleanOldJobs } = require('./queues/unifiedSyncQueue');
       await scheduleRecurringSyncs();
       
@@ -176,7 +195,7 @@ async function startServer() {
       
       console.log('Unified sync queue initialized');
     } catch (error) {
-      console.warn('Unified sync queue not initialized (Redis may not be available):', error.message);
+      console.warn('Unified sync queue not initialized (Redis not available):', error.message);
     }
     
     // Start server - listen on all network interfaces

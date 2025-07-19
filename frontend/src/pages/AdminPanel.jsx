@@ -13,7 +13,7 @@ import {
 import api from '../utils/api';
 import UserManagement from '../components/admin/UserManagement';
 import ApiKeyManagement from '../components/admin/ApiKeyManagement';
-import SiteManagement from '../components/admin/SiteManagement';
+import SiteManagementV2 from '../components/admin/SiteManagementV2';
 import AuditLogs from '../components/admin/AuditLogs';
 import SystemStats from '../components/admin/SystemStats';
 import SystemSettings from '../components/admin/SystemSettings';
@@ -70,7 +70,7 @@ const AdminPanel = () => {
       id: 'sites',
       name: 'Sites',
       icon: GlobeAltIcon,
-      component: SiteManagement,
+      component: SiteManagementV2,
       minRole: 'admin'
     },
     {

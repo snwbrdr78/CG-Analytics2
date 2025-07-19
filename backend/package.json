@@ -1,6 +1,6 @@
 {
   "name": "cg-analytics-backend",
-  "version": "1.1.26",
+  "version": "1.1.27",
   "description": "Backend API for Comedy Genius Analytics",
   "main": "server.js",
   "scripts": {
