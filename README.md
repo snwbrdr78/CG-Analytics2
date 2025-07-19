@@ -41,6 +41,14 @@ Comedy Genius Analytics is a full-stack application that processes Facebook Crea
 - **Automated Syncing**: Configurable sync intervals and data retention
 - **Unified Management**: All integrations managed through Sites interface
 
+### Documentation
+- **In-App Documentation**: Comprehensive user guides accessible at `/docs`
+- **Getting Started Guide**: Quick setup and user roles explanation
+- **Feature Documentation**: Detailed explanations of all platform capabilities
+- **API Reference**: Complete API documentation with code examples
+- **Interactive FAQ**: Searchable frequently asked questions
+- **Future Roadmap**: Vision and upcoming features
+
 ## Versioning
 
 This project follows a specific semantic versioning schema. Please see [VERSIONING.md](VERSIONING.md) for detailed guidelines on version numbering and updates.

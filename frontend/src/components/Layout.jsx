@@ -19,7 +19,8 @@ import {
   Cog6ToothIcon,
   LockClosedIcon,
   ChevronUpIcon,
-  ShareIcon
+  ShareIcon,
+  BookOpenIcon
 } from '@heroicons/react/24/outline'
 
 export default function Layout() {
@@ -44,6 +45,7 @@ export default function Layout() {
     { name: 'Posts', href: '/posts', icon: VideoCameraIcon },
     { name: 'Analytics', href: '/analytics', icon: ChartBarIcon },
     { name: 'Reports', href: '/reports', icon: DocumentTextIcon },
+    { name: 'Documentation', href: '/docs', icon: BookOpenIcon },
   ]
   
   // Add additional navigation items for non-artist users
@@ -57,6 +59,7 @@ export default function Layout() {
         { name: 'Analytics', href: '/analytics', icon: ChartBarIcon },
         { name: 'Reports', href: '/reports', icon: DocumentTextIcon },
         { name: 'Removed', href: '/removed', icon: ArchiveBoxXMarkIcon },
+        { name: 'Documentation', href: '/docs', icon: BookOpenIcon },
       ]
 
   // Add admin panel for admin and super_admin users

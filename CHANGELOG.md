@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.30] - 2025-01-19
+
+### Added
+- Comprehensive in-app documentation system accessible at `/docs`
+- Nine documentation sections with detailed guides:
+  - Getting Started Guide with quick setup instructions
+  - Features Overview showing all platform capabilities
+  - CSV Upload Guide with step-by-step instructions
+  - Social Media Integration setup documentation
+  - Analytics & Reporting guide with metric explanations
+  - Royalty Management documentation with payment workflows
+  - API Documentation with code examples in multiple languages
+  - Future Roadmap showing upcoming features and vision
+  - Interactive FAQ with search functionality
+- Documentation link in main navigation menu
+- Database schema enhancements for social media integration:
+  - 11 new columns in Snapshots table for enhanced metrics
+  - 7 new columns in Delta table for change tracking
+  - 13 new columns in Posts table for content metadata
+- Support for additional social media platforms in database schema
+
+### Fixed
+- Missing InformationCircleIcon import in SocialMediaIntegration component
+- Database column errors preventing analytics endpoints from loading
+- 500 errors on dashboard, earnings timeline, and top posts endpoints
+
+### Changed
+- Updated version display to read from version.json file
+- Enhanced Sites model with future platform support (TikTok, Twitter, Threads)
+
 ## [1.1.18] - 2025-01-18
 
 ### Added
