@@ -280,6 +280,14 @@ class UnifiedSyncService {
 
   /**
    * Transform Facebook post to our schema
+   * 
+   * Maps Facebook post fields to our unified Post model schema.
+   * Attempts to auto-match artist based on content.
+   * 
+   * @param {Object} fbPost - Raw Facebook post data from API
+   * @param {Object} site - Site model instance
+   * @returns {Object} Transformed post data matching our schema
+   * @private
    */
   async transformFacebookPost(fbPost, site) {
     return {
@@ -299,6 +307,14 @@ class UnifiedSyncService {
 
   /**
    * Transform Instagram media to our schema
+   * 
+   * Maps Instagram media fields to our unified Post model schema.
+   * Handles different media types and attempts artist matching.
+   * 
+   * @param {Object} igMedia - Raw Instagram media data from API
+   * @param {Object} site - Site model instance
+   * @returns {Object} Transformed post data matching our schema
+   * @private
    */
   async transformInstagramMedia(igMedia, site) {
     return {
@@ -317,6 +333,14 @@ class UnifiedSyncService {
 
   /**
    * Transform YouTube video to our schema
+   * 
+   * Maps YouTube video fields to our unified Post model schema.
+   * Handles video duration parsing and privacy status.
+   * 
+   * @param {Object} video - Raw YouTube video data from API
+   * @param {Object} site - Site model instance
+   * @returns {Object} Transformed post data matching our schema
+   * @private
    */
   async transformYouTubeVideo(video, site) {
     return {
@@ -336,6 +360,17 @@ class UnifiedSyncService {
 
   /**
    * Create snapshot from platform insights
+   * 
+   * Creates a point-in-time performance snapshot from platform-specific insights.
+   * Maps different platform metrics to our unified schema.
+   * Handles duplicate prevention with unique constraint on [postId, snapshotDate].
+   * 
+   * @param {string} postId - The post ID to create snapshot for
+   * @param {Object} insights - Platform-specific insights/metrics
+   * @param {string} platform - Platform name (facebook, instagram, youtube)
+   * @param {string} siteId - The site ID for tracking data source
+   * @returns {Object} Created snapshot instance
+   * @private
    */
   async createSnapshot(postId, insights, platform, siteId) {
     const snapshotData = {
@@ -408,6 +443,12 @@ class UnifiedSyncService {
 
   /**
    * Calculate deltas between snapshots
+   * 
+   * Calculates performance changes between consecutive snapshots.
+   * Creates delta records for daily, weekly, monthly, and quarterly periods.
+   * 
+   * @param {string} postId - The post ID to calculate deltas for
+   * @private
    */
   async calculateDeltas(postId) {
     // This would reuse existing delta calculation logic
@@ -415,7 +456,11 @@ class UnifiedSyncService {
   }
 
   /**
-   * Helper methods
+   * Map Facebook post type to our schema
+   * 
+   * @param {string} type - Facebook post type
+   * @returns {string} Our post type format
+   * @private
    */
   mapFacebookType(type) {
     const typeMap = {
@@ -427,6 +472,13 @@ class UnifiedSyncService {
     return typeMap[type?.toLowerCase()] || 'Video';
   }
 
+  /**
+   * Map Instagram media type to our schema
+   * 
+   * @param {string} type - Instagram media type (IMAGE, VIDEO, CAROUSEL_ALBUM, REELS)
+   * @returns {string} Our post type format
+   * @private
+   */
   mapInstagramType(type) {
     const typeMap = {
       'IMAGE': 'Photo',
@@ -437,6 +489,13 @@ class UnifiedSyncService {
     return typeMap[type] || 'Photo';
   }
 
+  /**
+   * Parse YouTube ISO 8601 duration to seconds
+   * 
+   * @param {string} isoDuration - ISO 8601 duration string (e.g., PT4M13S)
+   * @returns {number|null} Duration in seconds or null if invalid
+   * @private
+   */
   parseDuration(isoDuration) {
     if (!isoDuration) return null;
     // Convert ISO 8601 duration to seconds
@@ -448,6 +507,16 @@ class UnifiedSyncService {
     return hours * 3600 + minutes * 60 + seconds;
   }
 
+  /**
+   * Find artist by matching name in content
+   * 
+   * Searches for artist names in post title/description.
+   * Case-insensitive matching against active artists.
+   * 
+   * @param {string} content - Content to search for artist names
+   * @returns {string|null} Artist ID if found, null otherwise
+   * @private
+   */
   async findArtistFromContent(content) {
     if (!content) return null;
     

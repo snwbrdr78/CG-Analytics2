@@ -83,7 +83,15 @@ router.get('/auth/callback', authenticateToken, async (req, res) => {
   }
 });
 
-// Get connected Facebook accounts
+/**
+ * GET /api/facebook/accounts
+ * 
+ * Get all Facebook accounts (Sites) connected by the current user.
+ * Includes feature status and page information.
+ * 
+ * @requires authenticateToken
+ * @returns {Array} Array of connected Facebook accounts with features and pages
+ */
 router.get('/accounts', authenticateToken, async (req, res) => {
   try {
     const sites = await Site.findAll({

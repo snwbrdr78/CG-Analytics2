@@ -16,22 +16,44 @@ import api from '../../utils/api';
 import { toast } from 'react-hot-toast';
 import { formatCurrency, formatNumber, formatDate } from '../../utils/formatters';
 
+/**
+ * SiteManagementV2 Component
+ * 
+ * Unified interface for managing all social media platform connections.
+ * Replaces separate FacebookManagement, InstagramManagement, and YouTubeManagement components.
+ * 
+ * Features:
+ * - OAuth connection for Facebook, Instagram, and YouTube
+ * - Inline feature management with expandable sections
+ * - Real-time sync status and error display
+ * - Platform-specific statistics display
+ * - Pagination for large numbers of sites
+ * 
+ * @component
+ */
 const SiteManagementV2 = () => {
   const { darkMode } = useTheme();
-  const [sites, setSites] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [showPlatformModal, setShowPlatformModal] = useState(false);
-  const [expandedSites, setExpandedSites] = useState(new Set());
-  const [siteFeatures, setSiteFeatures] = useState({});
-  const [loadingFeatures, setLoadingFeatures] = useState({});
+  
+  // State management
+  const [sites, setSites] = useState([]);              // List of connected sites
+  const [loading, setLoading] = useState(true);         // Loading state for sites list
+  const [page, setPage] = useState(1);                  // Current page for pagination
+  const [totalPages, setTotalPages] = useState(1);      // Total pages available
+  const [showPlatformModal, setShowPlatformModal] = useState(false); // Modal for connecting new platforms
+  const [expandedSites, setExpandedSites] = useState(new Set());     // Track which sites have expanded features
+  const [siteFeatures, setSiteFeatures] = useState({});              // Cache of features for each site
+  const [loadingFeatures, setLoadingFeatures] = useState({});        // Loading state for features by site ID
 
+  // Fetch sites whenever page changes
   useEffect(() => {
     fetchSites();
   }, [page]);
 
-  // Check for OAuth redirect parameters
+  /**
+   * Handle OAuth redirect callbacks
+   * When users return from OAuth authentication, check URL parameters
+   * for success/error status and display appropriate messages
+   */
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const oauth = params.get('oauth');
@@ -48,6 +70,10 @@ const SiteManagementV2 = () => {
     }
   }, []);
 
+  /**
+   * Fetch all connected sites from the API
+   * Includes pagination support and error handling
+   */
   const fetchSites = async () => {
     try {
       setLoading(true);
@@ -62,6 +88,13 @@ const SiteManagementV2 = () => {
     }
   };
 
+  /**
+   * Fetch available features for a specific site
+   * Features are cached to avoid redundant API calls
+   * 
+   * @param {string} siteId - The ID of the site
+   * @param {string} platform - The platform type (facebook, instagram, youtube)
+   */
   const fetchSiteFeatures = async (siteId, platform) => {
     if (siteFeatures[siteId] || loadingFeatures[siteId]) return;
 
@@ -77,6 +110,13 @@ const SiteManagementV2 = () => {
     }
   };
 
+  /**
+   * Toggle the expanded state of a site card
+   * Fetches features on first expansion
+   * 
+   * @param {string} siteId - The ID of the site to toggle
+   * @param {string} platform - The platform type for feature fetching
+   */
   const toggleSiteExpansion = (siteId, platform) => {
     const newExpanded = new Set(expandedSites);
     if (newExpanded.has(siteId)) {
@@ -91,6 +131,12 @@ const SiteManagementV2 = () => {
     setExpandedSites(newExpanded);
   };
 
+  /**
+   * Initiate OAuth connection for a platform
+   * Redirects user to platform's OAuth consent page
+   * 
+   * @param {string} platform - The platform to connect (facebook, instagram, youtube)
+   */
   const handleOAuthConnect = async (platform) => {
     try {
       let authUrl = '';
@@ -121,6 +167,12 @@ const SiteManagementV2 = () => {
     }
   };
 
+  /**
+   * Trigger manual sync for a specific site
+   * Updates UI to show syncing status
+   * 
+   * @param {string} siteId - The ID of the site to sync
+   */
   const handleSync = async (siteId) => {
     try {
       const response = await api.post(`/sync/site/${siteId}`);
@@ -140,6 +192,12 @@ const SiteManagementV2 = () => {
     }
   };
 
+  /**
+   * Delete a site connection
+   * 
+   * @param {string} siteId - The ID of the site to delete
+   * @param {boolean} deleteData - Whether to also delete associated data
+   */
   const handleDelete = async (siteId, deleteData = false) => {
     const confirmMsg = deleteData 
       ? 'Are you sure you want to delete this site and ALL associated data? This cannot be undone!'
@@ -156,6 +214,15 @@ const SiteManagementV2 = () => {
     }
   };
 
+  /**
+   * Toggle a specific feature for a site
+   * Updates both server and local state
+   * 
+   * @param {string} siteId - The ID of the site
+   * @param {string} platform - The platform type
+   * @param {string} feature - The feature key to toggle
+   * @param {boolean} currentState - Current enabled state of the feature
+   */
   const toggleFeature = async (siteId, platform, feature, currentState) => {
     try {
       await api.post(`/${platform}/accounts/${siteId}/features/${feature}`, {
@@ -180,6 +247,7 @@ const SiteManagementV2 = () => {
     }
   };
 
+  // Platform configuration with icons, colors, and descriptions
   const platformData = {
     facebook: {
       icon: FaFacebook,
@@ -204,6 +272,7 @@ const SiteManagementV2 = () => {
     }
   };
 
+  // Status indicator styling based on sync state
   const syncStatusColors = {
     active: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
     syncing: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
@@ -212,6 +281,12 @@ const SiteManagementV2 = () => {
     disconnected: 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
   };
 
+  /**
+   * Get emoji icon for a feature based on its key
+   * 
+   * @param {string} key - The feature key
+   * @returns {string} Emoji icon for the feature
+   */
   const getFeatureIcon = (key) => {
     const icons = {
       posts: '📝',
