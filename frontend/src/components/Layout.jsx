@@ -1,5 +1,5 @@
 import { Link, useLocation, Outlet, useNavigate } from 'react-router-dom'
-import { useState, Fragment } from 'react'
+import { useState, Fragment, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
 import { Menu, Transition } from '@headlessui/react'
@@ -28,6 +28,15 @@ export default function Layout() {
   const { user, logout } = useAuth()
   const { darkMode, toggleDarkMode } = useTheme()
   const [showPasswordModal, setShowPasswordModal] = useState(false)
+  const [version, setVersion] = useState('')
+
+  useEffect(() => {
+    // Fetch version
+    fetch('/api/version')
+      .then(res => res.json())
+      .then(data => setVersion(data.version))
+      .catch(() => setVersion(''))
+  }, [])
 
   // Dynamic navigation based on user role
   const baseNavigation = [
@@ -114,6 +123,15 @@ export default function Layout() {
             )
           })}
         </nav>
+        
+        {/* Version display */}
+        {version && (
+          <div className="px-4 pb-2">
+            <div className="text-xs text-gray-500 dark:text-gray-600 text-center">
+              Version {version}
+            </div>
+          </div>
+        )}
         
         {/* User menu */}
         <div className="mt-auto p-4 border-t border-gray-800 dark:border-gray-700">

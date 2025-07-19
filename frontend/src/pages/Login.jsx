@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { toast } from 'react-hot-toast'
@@ -16,6 +16,15 @@ export default function Login() {
     password: ''
   })
   const [showForgotPassword, setShowForgotPassword] = useState(false)
+  const [version, setVersion] = useState('')
+
+  useEffect(() => {
+    // Fetch version
+    fetch('/api/version')
+      .then(res => res.json())
+      .then(data => setVersion(data.version))
+      .catch(() => setVersion('1.0.0'))
+  }, [])
 
   const from = location.state?.from?.pathname || '/'
 
@@ -122,6 +131,11 @@ export default function Login() {
         isOpen={showForgotPassword} 
         onClose={() => setShowForgotPassword(false)} 
       />
+      
+      {/* Version display */}
+      <div className="absolute bottom-4 right-4 text-sm text-gray-500 dark:text-gray-400">
+        v{version}
+      </div>
     </div>
   )
 }
